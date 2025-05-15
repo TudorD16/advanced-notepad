@@ -1,15 +1,11 @@
-sqllvar = 22222
-if sqllvar == 22222:
-    import tkinter as tk
-    from tkinter import ttk, messagebox, filedialog
-    import os
+if kbbbvar == 5189:
+    from tkinter import ttk, font, filedialog, colorchooser, messagebox
     
-    # Definirea folderului și fișierului
     FOLDER_NAME = "Serial"
     FILE_NAME = "product_key.lic95"
     cale_fis = "file_paths.txt"
     cale_fldr = "folder_paths.txt"
-    
+
     # Definirea cheii de validare
     KEY = "R46BX-JHR2J-PG7ER-24QFG-MWKVR"
     
@@ -17,10 +13,10 @@ if sqllvar == 22222:
     if not os.path.exists(FOLDER_NAME):
         try:
             os.makedirs(FOLDER_NAME)
-            print(f"Folder '{FOLDER_NAME}' creat cu succes.")
+            print(f"Folder '{FOLDER_NAME}' created successfully.")
         except Exception as e:
-            print(f"Eroare la crearea folderului '{FOLDER_NAME}': {e}")
-    
+            print(f"Error creating folder '{FOLDER_NAME}': {e}")
+
     def validate_key(event=None):
         # Funcția pentru validarea cheii
         global xx
@@ -32,7 +28,7 @@ if sqllvar == 22222:
             # Calea completă către fișier în folderul Serial
             file_path = os.path.join(FOLDER_NAME, FILE_NAME)
             
-            # Salvarea cheii în fișier text în folderul Serial
+            # Salvarea cheii în fișier text
             with open(file_path, "w") as file:
                 file.write(KEY)
             try:
@@ -41,6 +37,7 @@ if sqllvar == 22222:
                         file.write("")
             except Exception as e:
                 print(f"An error occurred while creating the file file_paths.txt: {e}")
+
             try:
                 if not os.path.exists("folder_paths.txt"):
                     with open("folder_paths.txt", "w") as file:
@@ -51,7 +48,7 @@ if sqllvar == 22222:
             xx = 0
             validate_button.config(state=tk.DISABLED)
             no_key_button.config(state=tk.NORMAL)
-    
+
     def load_key():
         try:
             # Calea completă către fișier în folderul Serial
@@ -71,7 +68,7 @@ if sqllvar == 22222:
         sys.exit()
 
     def valkey():
-        messagebox.showinfo(title="Licensed Product (professional version)", message="Secure connection.\nWelcome to the muap.ro domain!")
+        messagebox.showinfo(title="Product Activated (professional version)", message="Secure connection.\nWelcome to the muap.ro domain!")
         validation.destroy()
 
     def on_closing():
@@ -84,8 +81,8 @@ if sqllvar == 22222:
     validation.title("Product key validation")
     validation.geometry("260x260")  # Setarea dimensiunilor ferestrei principale
     validation.config(bg="gray20")
-    #image_icon80 = PhotoImage(file = "img/keylogo.png")
-    #validation.iconphoto(False, image_icon80)
+    image_icon61 = PhotoImage(file = "img/keylogo.png")
+    validation.iconphoto(False, image_icon61)
 
     # Crearea obiectului Text editabil
     text_box = tk.Text(validation, height=1, width=30)  # Setarea wrap="none" pentru a face obiectul Text dreptunghiular
