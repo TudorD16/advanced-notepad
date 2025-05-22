@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiapp Professional</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, system-ui, sans-serif;
+            background: #0a0a0a;
+            color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-size: 14px;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            animation: gridMove 20s linear infinite;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+        
+        .gradient-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 226, 0.15) 0%, transparent 50%);
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(15, 15, 15, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            overflow: hidden;
+            border-radius: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 30px 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(120, 119, 198, 0.8), transparent);
+        }
+        
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .app-info {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+        
+        .app-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #7877c6 0%, #ff77c6 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            color: white;
+            font-size: 28px;
+            box-shadow: 0 10px 30px rgba(120, 119, 198, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .app-icon::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            animation: shine 3s ease-in-out infinite;
+        }
+        
+        @keyframes shine {
+            0%, 100% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            50% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+        
+        .app-details h1 {
+            color: #ffffff;
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .app-details p {
+            color: #a0a0a0;
+            font-size: 16px;
+            font-weight: 400;
+        }
+        
+        .window-controls {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .control-btn {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .control-btn.close { 
+            background: linear-gradient(135deg, #ff5f5f 0%, #c92a2a 100%);
+            box-shadow: 0 2px 8px rgba(255, 95, 95, 0.3);
+        }
+        .control-btn.minimize { 
+            background: linear-gradient(135deg, #ffb347 0%, #fd9644 100%);
+            box-shadow: 0 2px 8px rgba(255, 179, 71, 0.3);
+        }
+        .control-btn.maximize { 
+            background: linear-gradient(135deg, #51cf66 0%, #40c057 100%);
+            box-shadow: 0 2px 8px rgba(81, 207, 102, 0.3);
+        }
+        
+        .control-btn:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .navigation {
+            background: rgba(20, 20, 20, 0.9);
+            padding: 0 40px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            position: relative;
+        }
+        
+        .nav-tabs {
+            display: flex;
+            gap: 0;
+            position: relative;
+        }
+        
+        .nav-tab {
+            padding: 20px 28px;
+            cursor: pointer;
+            color: #808080;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+            position: relative;
+            font-size: 15px;
+        }
+        
+        .nav-tab::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.05);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tab:hover {
+            color: #ffffff;
+        }
+        
+        .nav-tab:hover::before {
+            opacity: 1;
+        }
+        
+        .nav-tab.active {
+            color: #7877c6;
+            border-bottom-color: #7877c6;
+            background: rgba(120, 119, 198, 0.1);
+            box-shadow: 0 -2px 20px rgba(120, 119, 198, 0.2);
+        }
+        
+        .content {
+            padding: 40px;
+            min-height: 600px;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeInUp 0.5s ease-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0);
+            }
+        }
+        
+        .hero-section {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 50px 0;
+        }
+        
+        .hero-section h2 {
+            color: #ffffff;
+            font-size: 42px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #7877c6 100%);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .hero-section p {
+            color: #a0a0a0;
+            font-size: 20px;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+        
+        .highlight-card {
+            background: linear-gradient(135deg, rgba(120, 119, 198, 0.15) 0%, rgba(255, 119, 198, 0.15) 100%);
+            border: 1px solid rgba(120, 119, 198, 0.3);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .highlight-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: all 0.8s ease;
+        }
+        
+        .highlight-card:hover::before {
+            left: 100%;
+        }
+        
+        .highlight-card h3 {
+            color: #7877c6;
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+        
+        .feature-card {
+            background: linear-gradient(135deg, rgba(30, 30, 30, 0.8) 0%, rgba(40, 40, 40, 0.6) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 30px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(120, 119, 198, 0.1) 0%, rgba(255, 119, 198, 0.1) 100%);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: rgba(120, 119, 198, 0.5);
+        }
+        
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+        
+        .feature-card h4 {
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .feature-list li {
+            padding: 10px 0;
+            color: #d0d0d0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .feature-list li:hover {
+            color: #ffffff;
+            transform: translateX(5px);
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            color: #51cf66;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, rgba(81, 207, 102, 0.2) 0%, rgba(64, 192, 87, 0.2) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+        
+        .info-section {
+            background: linear-gradient(135deg, rgba(25, 25, 25, 0.8) 0%, rgba(35, 35, 35, 0.6) 100%);
+            border-radius: 16px;
+            padding: 30px;
+            margin: 30px 0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .info-section h3 {
+            color: #ffffff;
+            font-size: 24px;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .info-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .info-list li {
+            padding: 12px 0;
+            color: #d0d0d0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s ease;
+        }
+        
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .info-list li:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.02);
+            padding-left: 10px;
+        }
+        
+        .info-list strong {
+            color: #7877c6;
+            display: inline-block;
+            width: 140px;
+            font-weight: 600;
+        }
+        
+        .warning-box {
+            background: linear-gradient(135deg, rgba(255, 95, 95, 0.15) 0%, rgba(201, 42, 42, 0.15) 100%);
+            border: 1px solid rgba(255, 95, 95, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            margin: 20px 0;
+            color: #ffb3b3;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-weight: 500;
+        }
+        
+        .warning-box:before {
+            content: "⚠️";
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+        
+        .download-section {
+            text-align: center;
+            background: linear-gradient(135deg, rgba(25, 25, 25, 0.8) 0%, rgba(35, 35, 35, 0.6) 100%);
+            border-radius: 20px;
+            padding: 50px;
+            margin: 30px 0;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        
+        .download-section h3 {
+            color: #ffffff;
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #7877c6 0%, #5a5ab8 100%);
+            color: white;
+            border: none;
+            padding: 18px 36px;
+            font-size: 18px;
+            font-weight: 600;
+            border-radius: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.4s ease;
+            box-shadow: 0 8px 25px rgba(120, 119, 198, 0.4);
+            margin: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: all 0.6s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px rgba(120, 119, 198, 0.5);
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, rgba(60, 60, 60, 0.8) 0%, rgba(80, 80, 80, 0.8) 100%);
+            color: #f0f0f0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 12px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            margin: 6px;
+        }
+        
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, rgba(80, 80, 80, 0.9) 0%, rgba(100, 100, 100, 0.9) 100%);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+        
+        .footer {
+            background: linear-gradient(135deg, rgba(15, 15, 15, 0.9) 0%, rgba(25, 25, 25, 0.9) 100%);
+            padding: 25px 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .developer-info {
+            color: #a0a0a0;
+            font-size: 15px;
+        }
+        
+        .developer-info strong {
+            color: #7877c6;
+            font-weight: 600;
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #51cf66;
+            font-size: 15px;
+            font-weight: 500;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #51cf66;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 10px rgba(81, 207, 102, 0.5);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+        
+        .tech-badges {
+            display: flex;
+            gap: 12px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .tech-badge {
+            background: linear-gradient(135deg, rgba(120, 119, 198, 0.2) 0%, rgba(255, 119, 198, 0.2) 100%);
+            color: #b8b7ff;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid rgba(120, 119, 198, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .tech-badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(120, 119, 198, 0.3);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 16px;
+            }
+            
+            .header {
+                padding: 25px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .content {
+                padding: 25px;
+            }
+            
+            .feature-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .nav-tabs {
+                overflow-x: auto;
+                padding-bottom: 5px;
+            }
+            
+            .nav-tab {
+                padding: 16px 20px;
+                white-space: nowrap;
+            }
+            
+            .hero-section h2 {
+                font-size: 32px;
+            }
+            
+            .hero-section p {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-grid"></div>
+    <div class="gradient-overlay"></div>
+    
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="app-info">
+                    <div class="app-icon">95</div>
+                    <div class="app-details">
+                        <h1>Multiapp Professional</h1>
+                        <p>The ultimate productivity and efficiency suite</p>
+                    </div>
+                </div>
+                <div class="window-controls">
+                    <div class="control-btn minimize"></div>
+                    <div class="control-btn maximize"></div>
+                    <div class="control-btn close"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="navigation">
+            <div class="nav-tabs">
+                <div class="nav-tab active" onclick="showTab('overview')">Overview</div>
+                <div class="nav-tab" onclick="showTab('features')">Features</div>
+                <div class="nav-tab" onclick="showTab('system')">System Requirements</div>
+                <div class="nav-tab" onclick="showTab('download')">Download</div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div id="overview" class="tab-content active">
+                <div class="hero-section">
+                    <h2>Revolutionize Your Workflow</h2>
+                    <p>A comprehensive software suite that combines dozens of professional tools into a single, powerful application. Built with modern technologies for maximum performance and reliability.</p>
+                </div>
+                
+                <div class="highlight-card">
+                    <h3>🚀 Why Choose Multiapp Professional?</h3>
+                    <p>All-in-one solution • No additional installations • Advanced security • Intuitive interface • Regular updates</p>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Technical Details</h3>
+                    <div class="tech-badges">
+                        <span class="tech-badge">Python</span>
+                        <span class="tech-badge">C++</span>
+                        <span class="tech-badge">x64 Architecture</span>
+                        <span class="tech-badge">Single Executable</span>
+                        <span class="tech-badge">Portable</span>
+                    </div>
+                    <ul class="info-list">
+                        <li><strong>Developer:</strong> Tudor Marmureanu</li>
+                        <li><strong>Languages:</strong> This software was written in Python and C++ and precompiled into a single file.</li>
+                        <li><strong>Architecture:</strong> x64 Only (Windows 10 or 11)</li>
+                        <li><strong>Distribution:</strong> Single executable file</li>
+                        <li><strong>Installation:</strong> Portable - One setup required</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div id="features" class="tab-content">
+                <div class="hero-section">
+                    <h2>Comprehensive Feature Set</h2>
+                    <p>Over 20+ professional tools organized into intuitive categories</p>
+                </div>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <h4>🔧 System & Diagnostics</h4>
+                        <ul class="feature-list">
+							<li>System compatibility testing</li>
+                            <li>Hardware diagnostics & monitoring</li>
+                            <li>Network troubleshooting tools</li>
+                            <li>Support IT process automation</li>
+                            <li>Advanced terminal emulator</li>
+                            <li>Performance optimization</li>
+							<li>Alert monitor</li>
+							<li>Event viewer</li>
+							<li>Manual & automatic repair tool for Multiapp</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>📁 File Management Pro</h4>
+                        <ul class="feature-list">
+                            <li>Smart backup tool</li>
+                            <li>Advanced files & folders comparator</li>
+                            <li>ZIP password recovery & maker</li>
+                            <li>Intelligent file organizer</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>🔐 Security Suite</h4>
+                        <ul class="feature-list">
+                            <li>Military-grade file encryption</li>
+                            <li>Advanced password manager & generation tool</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>💼 Office Suite Lite</h4>
+                        <ul class="feature-list">
+							<li>Word, Power Point & Excel file reader</li>
+                            <li>Spreadsheet editor (Excel-compatible)</li>
+                            <li>Document conversion tools</li>
+                            <li>PDF tools</li>
+							<li>Advanced text editor</li>
+							<li>Paint app & whiteboard</li>
+							<li>Find & replace text tool</li>
+							<li>Contacts manager</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>💻 Development Tools</h4>
+                        <ul class="feature-list">
+                            <li>Full-featured Python IDE</li>
+                            <li>SQLlite editor & reader with syntax highlighting</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-card">
+                        <h4>🤖 AI & Productivity</h4>
+                        <ul class="feature-list">
+                            <li>AI Chatbot (95% Romanian support)</li>
+                            <li>Smart calendar & scheduling</li>
+                            <li>Task management system</li>
+                            <li>Knowledge base system</li>
+                            <li>Account launcher & manager</li>
+                            <li>Workflow automation</li>
+							<li>Q&A platform</li>
+							<li>Pause manager for teams</li>
+							<li>Screen recorder app</li>
+							<li>Launcher app for Multiapp accounts</li>
+							<li>Total Commander tool</li>
+							<li>Calendar app</li>
+							<li>Visual diagram creator</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="system" class="tab-content">
+                <div class="hero-section">
+                    <h2>System Requirements</h2>
+                    <p>Ensure your system meets these requirements for optimal performance</p>
+                </div>
+                
+                <div class="warning-box">
+                    <strong>Important: This software is designed exclusively for x64 (64-bit) systems</strong>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Minimum Requirements</h3>
+                    <ul class="info-list">
+                        <li><strong>Architecture:</strong> x64 (i3 64-bit processor required - between 1 și 2 GHz)</li>
+                        <li><strong>OS:</strong> Windows 10 (build 1903+) or Windows 11</li>
+                        <li><strong>RAM:</strong> 4GB minimum</li>
+                        <li><strong>Storage:</strong> 500MB free disk space</li>
+                        <li><strong>Permissions:</strong> Administrator privileges for full functionality</li>
+                        <li><strong>Network:</strong> Internet connection for AI features and updates</li>
+                    </ul>
+                </div>
+                
+                <div class="info-section">
+                    <h3>Recommended Specifications</h3>
+                    <ul class="info-list">
+                        <li><strong>Processor:</strong> Intel Core i5 or AMD Ryzen 5 (or equivalent)</li>
+                        <li><strong>RAM:</strong> 8GB recommended or 16GB for heavy development work</li>
+                        <li><strong>Storage:</strong> SSD for faster file operations</li>
+                        <li><strong>Display:</strong> 1920x1080 or higher resolution</li>
+                    </ul>
+                </div>
+                
+                <div class="highlight-card">
+                    <h3>🔍 Built-in Compatibility Check</h3>
+                    <p>No need to worry about compatibility! Multiapp 95 Professional includes an integrated system compatibility checker that verifies your hardware and software configuration automatically.</p>
+                </div>
+            </div>
+            
+            <div id="download" class="tab-content">
+                <div class="download-section">
+                    <h3>🚀 Ready to Get Started?</h3>
+                    <p>Download Multiapp 95 Professional and unlock the full potential of your productivity workflow.</p>
+                    
+                    <div class="highlight-card">
+                        <h3>📦 What You Get</h3>
+                        <ul class="feature-list" style="text-align: left; max-width: 400px; margin: 0 auto;">
+                            <li>Single executable file - no installer needed</li>
+                            <li>Portable application - run from anywhere</li>
+                            <li>All features unlocked immediately</li>
+                            <li>No additional dependencies required</li>
+                            <li>Automatic updates when available</li>
+                        </ul>
+                    </div>
+                    
+                    <div style="margin: 32px 0;">
+                        <a href="https://mega.nz/file/RQYkDaBa#VE6vg6fIxZlZpgA1UhnzLfnPjZ6dyMU_yZNfdqze9jo" class="btn-primary">
+                            📥 Download Now
+                        </a>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: center; gap: 16px; flex-wrap: wrap; margin-top: 20px;">
+                        <button class="btn-secondary" onclick="showTab('features')">🔍 View Features</button>
+                        <button class="btn-secondary" onclick="showTab('system')">⚙️ Check Requirements</button>
+                        <button class="btn-secondary" onclick="window.open('mailto:support@muap.ro')">📧 Contact Support</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <div class="developer-info">
+                <strong style="color: #7877c6">Developer:</strong> <i>Tudor Marmureanu</i> | 
+                <strong>Support:</strong> <i>support@muap.ro</i>
+            </div>
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                System Ready
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+        
+        // Window controls functionality
+        document.querySelector('.close').addEventListener('click', function() {
+            if (confirm('Are you sure you want to close this application?')) {
+                window.close();
+            }
+        });
+        
+        document.querySelector('.minimize').addEventListener('click', function() {
+            // Minimize effect
+            document.querySelector('.container').style.transform = 'scale(0.1)';
+            setTimeout(() => {
+                document.querySelector('.container').style.transform = 'scale(1)';
+            }, 500);
+        });
+        
+        document.querySelector('.maximize').addEventListener('click', function() {
+            const container = document.querySelector('.container');
+            container.style.maxWidth = container.style.maxWidth === '95vw' ? '1400px' : '95vw';
+        });
+        
+        // Add smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+        
+        // Add loading animation for download button
+        document.querySelector('.btn-primary').addEventListener('click', function(e) {
+            const originalText = this.innerHTML;
+            this.innerHTML = '⏳ Preparing download...';
+            this.style.pointerEvents = 'none';
+            
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.style.pointerEvents = 'auto';
+            }, 2000);
+        });
+        
+        // Parallax effect for background elements
+        document.addEventListener('mousemove', function(e) {
+            const x = (e.clientX / window.innerWidth) - 0.5;
+            const y = (e.clientY / window.innerHeight) - 0.5;
+            
+            const gradientOverlay = document.querySelector('.gradient-overlay');
+            gradientOverlay.style.transform = `translate(${x * 20}px, ${y * 20}px)`;
+        });
+        
+        // Smooth entrance animation
+        window.addEventListener('load', function() {
+            document.querySelector('.container').style.animation = 'fadeInUp 0.8s ease-out';
+        });
+        
+        // Add interactive glow effect to cards
+        document.querySelectorAll('.feature-card, .info-section, .highlight-card').forEach(card => {
+            card.addEventListener('mousemove', function(e) {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                card.style.background = `
+                    radial-gradient(circle at ${x}px ${y}px, rgba(120, 119, 198, 0.15) 0%, transparent 50%),
+                    ${card.style.background || 'linear-gradient(135deg, rgba(30, 30, 30, 0.8) 0%, rgba(40, 40, 40, 0.6) 100%)'}
+                `;
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                card.style.background = '';
+            });
+        });
+    </script>
+</body>
+</html>
