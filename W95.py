@@ -64,6 +64,7 @@ class Windows95Desktop:
         self.create_desktop_icon("Hardware Info", 50, 330, "hardware")
         self.create_desktop_icon("Paint", 50, 400, "paint")
         self.create_desktop_icon("Excel Lite", 50, 470, "excel")
+        self.create_desktop_icon("Word Lite", 50, 540, "word")
     
     def make_window_draggable(self, window, title_bar):
         """Make a window draggable by its title bar"""
@@ -145,6 +146,14 @@ class Windows95Desktop:
             # Linii orizontale
             icon_canvas.create_line(6, 13, 26, 13, fill="#FFFFFF", width=1)
             icon_canvas.create_line(6, 19, 26, 19, fill="#FFFFFF", width=1)
+        elif icon_type == "word":
+            # Desenează un simbol pentru Word (document cu linii text)
+            icon_canvas.create_rectangle(6, 6, 26, 26, fill="#0000CC", outline="#000000")
+            # Linii text
+            icon_canvas.create_line(9, 11, 23, 11, fill="#FFFFFF", width=1)
+            icon_canvas.create_line(9, 15, 23, 15, fill="#FFFFFF", width=1)
+            icon_canvas.create_line(9, 19, 23, 19, fill="#FFFFFF", width=1)
+            icon_canvas.create_line(9, 23, 18, 23, fill="#FFFFFF", width=1)
         
         # Label pentru numele iconitei
         label = tk.Label(icon_frame, text=name, bg="#008080", fg="white", 
@@ -177,8 +186,498 @@ class Windows95Desktop:
         elif icon_type == "excel":
             if not any(title == "Excel Lite" for title, _, _ in self.open_windows):
                 self.create_excel_lite()
+        elif icon_type == "word":
+            if not any(title == "Word Lite" for title, _, _ in self.open_windows):
+                self.create_word_lite()
         else:
             self.open_window(name)
+    
+    '''
+    def create_word_lite(self, file_path=None):
+        """Creează o aplicație Word Lite pentru a deschide și vizualiza fișiere .doc sau .docx"""
+        word_window = tk.Toplevel(self.rootW95dist)
+        word_window.title("Word Lite")
+        word_window.overrideredirect(True)
+        word_window.geometry("800x600+200+100")
+        word_window.configure(bg="#c0c0c0")
+        
+        # Add Windows 95 style title bar
+        title_bar = tk.Frame(word_window, bg="#000080", height=25)
+        title_bar.pack(fill="x", side="top")
+        title_label = tk.Label(title_bar, text="Word Lite", fg="white", bg="#000080",
+                              font=("MS Sans Serif", 8, "bold"))
+        title_label.pack(side="left", padx=5, pady=2)
+        
+        # Close button for title bar
+        close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                                font=("Arial", 8, "bold"), width=2, height=1,
+                                relief="raised", bd=1,
+                                command=lambda: self.close_window("Word Lite", word_window))
+        close_button.pack(side="right", padx=2, pady=1)
+        
+        self.make_window_draggable(word_window, title_bar)
+        
+        # Menubar
+        menubar = tk.Menu(word_window)
+        word_window.config(menu=menubar)
+        
+        file_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", menu=file_menu)
+        
+        edit_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Edit", menu=edit_menu)
+        
+        view_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="View", menu=view_menu)
+        
+        format_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Format", menu=format_menu)
+        
+        help_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Help", menu=help_menu)
+        
+        # Toolbar frame
+        toolbar_frame = tk.Frame(word_window, bg="#c0c0c0", relief="raised", bd=2, height=35)
+        toolbar_frame.pack(fill="x")
+        toolbar_frame.pack_propagate(False)
+        
+        # Open button
+        open_btn = tk.Button(toolbar_frame, text="Open", bg="#c0c0c0", relief="raised", bd=2,
+                            font=("MS Sans Serif", 8),
+                            command=lambda: open_document())
+        open_btn.pack(side="left", padx=5, pady=2)
+        
+        # Save button (for future implementation)
+        save_btn = tk.Button(toolbar_frame, text="Save", bg="#c0c0c0", relief="raised", bd=2,
+                            font=("MS Sans Serif", 8),
+                            command=lambda: save_document())
+        save_btn.pack(side="left", padx=5, pady=2)
+        
+        # Print button
+        print_btn = tk.Button(toolbar_frame, text="Print", bg="#c0c0c0", relief="raised", bd=2,
+                             font=("MS Sans Serif", 8),
+                             command=lambda: messagebox.showinfo("Print", "Printing functionality is not implemented in this version"))
+        print_btn.pack(side="left", padx=5, pady=2)
+        
+        # Status bar
+        status_frame = tk.Frame(word_window, bg="#c0c0c0", relief="sunken", bd=1, height=25)
+        status_frame.pack(side="bottom", fill="x")
+        status_frame.pack_propagate(False)
+        
+        status_label = tk.Label(status_frame, text="Ready", bg="#c0c0c0", font=("MS Sans Serif", 8))
+        status_label.pack(side="left", padx=5)
+        
+        # Main content frame
+        content_frame = tk.Frame(word_window, bg="white")
+        content_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        # Text area
+        text_frame = tk.Frame(content_frame, bg="white")
+        text_frame.pack(fill="both", expand=True)
+        
+        # Scrollbars
+        v_scrollbar = tk.Scrollbar(text_frame)
+        v_scrollbar.pack(side="right", fill="y")
+        
+        h_scrollbar = tk.Scrollbar(text_frame, orient="horizontal")
+        h_scrollbar.pack(side="bottom", fill="x")
+        
+        # Text widget
+        text_area = tk.Text(text_frame, wrap="word", yscrollcommand=v_scrollbar.set, 
+                           xscrollcommand=h_scrollbar.set,
+                           font=("Times New Roman", 12), bg="white", fg="black")
+        text_area.pack(side="left", fill="both", expand=True)
+        
+        v_scrollbar.config(command=text_area.yview)
+        h_scrollbar.config(command=text_area.xview)
+        
+        # Variables for tracking
+        current_file = None
+        
+        def open_document():
+            """Open a Word document"""
+            file_path = filedialog.askopenfilename(
+                defaultextension=".docx",
+                filetypes=[("Word files", "*.docx;*.doc"), ("Text files", "*.txt"), ("All files", "*.*")]
+            )
+            
+            if not file_path:
+                return
+            
+            try:
+                # Set cursor to wait
+                word_window.config(cursor="wait")
+                word_window.update()
+                
+                # Clear text area
+                text_area.delete(1.0, tk.END)
+                
+                # Get the file extension
+                ext = os.path.splitext(file_path)[1].lower()
+                
+                # Handle different file types
+                if ext == ".txt":
+                    # Simple text file
+                    with open(file_path, 'r', encoding='utf-8') as file:
+                        content = file.read()
+                        text_area.insert(tk.END, content)
+                elif ext in [".doc", ".docx"]:
+                    # Try to handle Word documents (simplified - only extracts text)
+                    text_area.insert(tk.END, "Word Lite can display only plain text from Word documents.\n\n")
+                    
+                    try:
+                        # If python-docx is installed, use it
+                        import docx
+                        doc = docx.Document(file_path)
+                        for para in doc.paragraphs:
+                            text_area.insert(tk.END, para.text + "\n")
+                    except ImportError:
+                        # Fallback method
+                        text_area.insert(tk.END, "Cannot read Word document content. The python-docx library is not installed.\n")
+                        text_area.insert(tk.END, "To install it, run: pip install python-docx\n\n")
+                        text_area.insert(tk.END, "For now, only showing document metadata:\n")
+                        text_area.insert(tk.END, f"Filename: {os.path.basename(file_path)}\n")
+                        text_area.insert(tk.END, f"Size: {os.path.getsize(file_path)} bytes\n")
+                else:
+                    text_area.insert(tk.END, f"Cannot open file type: {ext}\n")
+                    text_area.insert(tk.END, "Word Lite supports .txt, .doc, and .docx files.")
+                
+                # Update window title and status
+                file_name = os.path.basename(file_path)
+                title_label.config(text=f"Word Lite - {file_name}")
+                word_window.title(f"Word Lite - {file_name}")
+                status_label.config(text=f"Opened: {file_name}")
+                
+                # Save the current file
+                nonlocal current_file
+                current_file = file_path
+                
+            except Exception as e:
+                text_area.delete(1.0, tk.END)
+                text_area.insert(tk.END, f"Error opening file: {str(e)}")
+                messagebox.showerror("Error", f"Could not open file: {str(e)}")
+            finally:
+                # Reset cursor
+                word_window.config(cursor="")
+        
+        def save_document():
+            """Save a document (placeholder)"""
+            messagebox.showinfo("Info", "Save functionality is not implemented in this version")
+        
+        # File menu commands
+        file_menu.add_command(label="Open", command=open_document)
+        file_menu.add_command(label="Save", command=save_document)
+        file_menu.add_separator()
+        file_menu.add_command(label="Print", command=lambda: messagebox.showinfo("Print", "Printing functionality is not implemented in this version"))
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=lambda: self.close_window("Word Lite", word_window))
+        
+        # Edit menu commands
+        edit_menu.add_command(label="Cut", command=lambda: status_label.config(text="Cut not implemented"))
+        edit_menu.add_command(label="Copy", command=lambda: status_label.config(text="Copy not implemented"))
+        edit_menu.add_command(label="Paste", command=lambda: status_label.config(text="Paste not implemented"))
+        
+        # View menu
+        view_menu.add_command(label="Zoom", command=lambda: status_label.config(text="Zoom not implemented"))
+        
+        # Format menu
+        format_menu.add_command(label="Font", command=lambda: status_label.config(text="Font formatting not implemented"))
+        
+        # Help menu
+        help_menu.add_command(label="About Word Lite", command=lambda: messagebox.showinfo("About", "Word Lite\nVersion 1.0\n\nA simple document viewer"))
+        
+        # If a file path was provided, open it
+        if file_path and os.path.exists(file_path):
+            current_file = file_path
+            try:
+                # Set the file path and call the open function
+                open_document()
+            except Exception as e:
+                text_area.delete(1.0, tk.END)
+                text_area.insert(tk.END, f"Error opening file: {str(e)}")
+        
+        # Add to taskbar
+        self.add_window_to_taskbar("Word Lite", word_window)
+        word_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("Word Lite", word_window))
+    '''
+    
+    def create_word_lite(self, file_path=None):
+        """Creează o aplicație Word Lite pentru a deschide și vizualiza fișiere .doc sau .docx"""
+        import zipfile
+        import xml.etree.ElementTree as ET
+        import re
+        
+        word_window = tk.Toplevel(self.rootW95dist)
+        word_window.title("Word Lite")
+        word_window.overrideredirect(True)
+        word_window.geometry("800x600+200+100")
+        word_window.configure(bg="#c0c0c0")
+        
+        # Add Windows 95 style title bar
+        title_bar = tk.Frame(word_window, bg="#000080", height=25)
+        title_bar.pack(fill="x", side="top")
+        title_label = tk.Label(title_bar, text="Word Lite", fg="white", bg="#000080",
+                              font=("MS Sans Serif", 8, "bold"))
+        title_label.pack(side="left", padx=5, pady=2)
+        
+        # Close button for title bar
+        close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                                font=("Arial", 8, "bold"), width=2, height=1,
+                                relief="raised", bd=1,
+                                command=lambda: self.close_window("Word Lite", word_window))
+        close_button.pack(side="right", padx=2, pady=1)
+        
+        self.make_window_draggable(word_window, title_bar)
+        
+        # Menubar
+        menubar = tk.Menu(word_window)
+        word_window.config(menu=menubar)
+        
+        file_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", menu=file_menu)
+        
+        edit_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Edit", menu=edit_menu)
+        
+        view_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="View", menu=view_menu)
+        
+        format_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Format", menu=format_menu)
+        
+        help_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Help", menu=help_menu)
+        
+        # Toolbar frame
+        toolbar_frame = tk.Frame(word_window, bg="#c0c0c0", relief="raised", bd=2, height=35)
+        toolbar_frame.pack(fill="x")
+        toolbar_frame.pack_propagate(False)
+        
+        # Open button
+        open_btn = tk.Button(toolbar_frame, text="Open", bg="#c0c0c0", relief="raised", bd=2,
+                            font=("MS Sans Serif", 8),
+                            command=lambda: open_document())
+        open_btn.pack(side="left", padx=5, pady=2)
+        
+        # Save button (for future implementation)
+        save_btn = tk.Button(toolbar_frame, text="Save", bg="#c0c0c0", relief="raised", bd=2,
+                            font=("MS Sans Serif", 8),
+                            command=lambda: save_document())
+        save_btn.pack(side="left", padx=5, pady=2)
+        
+        # Print button
+        print_btn = tk.Button(toolbar_frame, text="Print", bg="#c0c0c0", relief="raised", bd=2,
+                             font=("MS Sans Serif", 8),
+                             command=lambda: messagebox.showinfo("Print", "Printing functionality is not implemented in this version"))
+        print_btn.pack(side="left", padx=5, pady=2)
+        
+        # Status bar
+        status_frame = tk.Frame(word_window, bg="#c0c0c0", relief="sunken", bd=1, height=25)
+        status_frame.pack(side="bottom", fill="x")
+        status_frame.pack_propagate(False)
+        
+        status_label = tk.Label(status_frame, text="Ready", bg="#c0c0c0", font=("MS Sans Serif", 8))
+        status_label.pack(side="left", padx=5)
+        
+        # Main content frame
+        content_frame = tk.Frame(word_window, bg="white")
+        content_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        # Text area
+        text_frame = tk.Frame(content_frame, bg="white")
+        text_frame.pack(fill="both", expand=True)
+        
+        # Scrollbars
+        v_scrollbar = tk.Scrollbar(text_frame)
+        v_scrollbar.pack(side="right", fill="y")
+        
+        h_scrollbar = tk.Scrollbar(text_frame, orient="horizontal")
+        h_scrollbar.pack(side="bottom", fill="x")
+        
+        # Text widget
+        text_area = tk.Text(text_frame, wrap="word", yscrollcommand=v_scrollbar.set, 
+                           xscrollcommand=h_scrollbar.set,
+                           font=("Times New Roman", 12), bg="white", fg="black")
+        text_area.pack(side="left", fill="both", expand=True)
+        
+        v_scrollbar.config(command=text_area.yview)
+        h_scrollbar.config(command=text_area.xview)
+        
+        # Variables for tracking
+        current_file = None
+        
+        def extract_text_from_docx(docx_file):
+            """Extract text from a .docx file using standard libraries"""
+            try:
+                # Fișierele .docx sunt arhive ZIP care conțin fișiere XML
+                z = zipfile.ZipFile(docx_file)
+                
+                # Verificăm dacă există fișierul document.xml
+                if "word/document.xml" in z.namelist():
+                    # Extragem și citim XML-ul principal
+                    xml_content = z.read("word/document.xml")
+                    
+                    # Parsăm XML-ul
+                    tree = ET.fromstring(xml_content)
+                    
+                    # Găsim toate elementele "w:t" care conțin text
+                    text_content = ""
+                    
+                    # Namespace-ul folosit de docx
+                    namespace = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+                    
+                    # Extragem textul din XML folosind XPath
+                    for paragraph in tree.findall('.//w:p', namespace):
+                        paragraph_text = ""
+                        for text_element in paragraph.findall('.//w:t', namespace):
+                            if text_element.text:
+                                paragraph_text += text_element.text
+                        
+                        text_content += paragraph_text + "\n"
+                    
+                    return text_content
+                else:
+                    return "Nu s-a putut găsi conținutul documentului în arhivă."
+            except Exception as e:
+                return f"Eroare la extragerea textului: {str(e)}"
+        
+        def extract_text_from_doc(doc_file):
+            """Extrage text din fișier .doc (format binar vechi)"""
+            # Pentru fișierele .doc (format binar), putem încerca să extragem doar textul vizibil
+            try:
+                with open(doc_file, 'rb') as f:
+                    content = f.read()
+                    
+                    # Încercăm să extragem text vizibil folosind o abordare simplă
+                    # Aceasta nu este o soluție perfectă, dar poate funcționa pentru text simplu
+                    text = ""
+                    
+                    # Convertim conținutul binar în text dacă este posibil
+                    try:
+                        # Încercăm să decodificăm ca UTF-16
+                        binary_text = content.decode('utf-16', errors='ignore')
+                        
+                        # Eliminăm caracterele non-printabile
+                        printable_text = ''.join(c for c in binary_text if c.isprintable() or c.isspace())
+                        
+                        # Folosim regex pentru a găsi texte consecutive
+                        # Căutăm secvențe de text de cel puțin 3 caractere
+                        text_chunks = re.findall(r'[A-Za-z0-9\s.,;:!?\'"\-+]{3,}', printable_text)
+                        
+                        # Filtrăm și combinăm fragmentele de text
+                        for chunk in text_chunks:
+                            chunk = chunk.strip()
+                            if len(chunk) > 5:  # Ignorăm fragmentele prea scurte
+                                text += chunk + "\n"
+                    except:
+                        text = "Nu s-a putut extrage text din documentul .doc.\n"
+                        text += "Formatul .doc este un format binar vechi și complex.\n"
+                        text += "Pentru rezultate mai bune, folosiți fișiere .docx sau .txt."
+                    
+                    return text
+            except Exception as e:
+                return f"Eroare la deschiderea fișierului .doc: {str(e)}"
+        
+        def open_document():
+            """Open a Word document"""
+            file_path = filedialog.askopenfilename(
+                defaultextension=".docx",
+                filetypes=[("Word files", "*.docx;*.doc"), ("Text files", "*.txt"), ("All files", "*.*")]
+            )
+            
+            if not file_path:
+                return
+            
+            try:
+                # Set cursor to wait
+                word_window.config(cursor="wait")
+                word_window.update()
+                
+                # Clear text area
+                text_area.delete(1.0, tk.END)
+                
+                # Get the file extension
+                ext = os.path.splitext(file_path)[1].lower()
+                
+                # Handle different file types
+                if ext == ".txt":
+                    # Simple text file
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as file:
+                        content = file.read()
+                        text_area.insert(tk.END, content)
+                elif ext == ".docx":
+                    # Extract text from .docx file
+                    content = extract_text_from_docx(file_path)
+                    text_area.insert(tk.END, content)
+                elif ext == ".doc":
+                    # Try to extract text from old .doc format
+                    content = extract_text_from_doc(file_path)
+                    text_area.insert(tk.END, content)
+                else:
+                    text_area.insert(tk.END, f"Cannot open file type: {ext}\n")
+                    text_area.insert(tk.END, "Word Lite supports .txt, .doc, and .docx files.")
+                
+                # Update window title and status
+                file_name = os.path.basename(file_path)
+                title_label.config(text=f"Word Lite - {file_name}")
+                word_window.title(f"Word Lite - {file_name}")
+                status_label.config(text=f"Opened: {file_name}")
+                
+                # Save the current file
+                nonlocal current_file
+                current_file = file_path
+                
+            except Exception as e:
+                text_area.delete(1.0, tk.END)
+                text_area.insert(tk.END, f"Error opening file: {str(e)}")
+                messagebox.showerror("Error", f"Could not open file: {str(e)}")
+            finally:
+                # Reset cursor
+                word_window.config(cursor="")
+        
+        def save_document():
+            """Save a document (placeholder)"""
+            messagebox.showinfo("Info", "Save functionality is not implemented in this version")
+        
+        # File menu commands
+        file_menu.add_command(label="Open", command=open_document)
+        file_menu.add_command(label="Save", command=save_document)
+        file_menu.add_separator()
+        file_menu.add_command(label="Print", command=lambda: messagebox.showinfo("Print", "Printing functionality is not implemented in this version"))
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=lambda: self.close_window("Word Lite", word_window))
+        
+        # Edit menu commands
+        edit_menu.add_command(label="Cut", command=lambda: text_area.event_generate("<<Cut>>"))
+        edit_menu.add_command(label="Copy", command=lambda: text_area.event_generate("<<Copy>>"))
+        edit_menu.add_command(label="Paste", command=lambda: text_area.event_generate("<<Paste>>"))
+        
+        # View menu
+        view_menu.add_command(label="Zoom", command=lambda: status_label.config(text="Zoom not implemented"))
+        
+        # Format menu
+        format_menu.add_command(label="Font", command=lambda: status_label.config(text="Font formatting not implemented"))
+        
+        # Help menu
+        help_menu.add_command(label="About Word Lite", command=lambda: messagebox.showinfo("About", "Word Lite\nVersion 1.0\n\nA simple document viewer"))
+        
+        # If a file path was provided, open it
+        if file_path and os.path.exists(file_path):
+            current_file = file_path
+            try:
+                # Use a temporary file path variable to avoid conflicts with the open_document function
+                temp_path = file_path
+                # Clear it to avoid double opening
+                file_path = None
+                # Call the open function with the correct path
+                open_document()
+            except Exception as e:
+                text_area.delete(1.0, tk.END)
+                text_area.insert(tk.END, f"Error opening file: {str(e)}")
+        
+        # Add to taskbar
+        self.add_window_to_taskbar("Word Lite", word_window)
+        word_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("Word Lite", word_window))
     
     def create_excel_lite(self, file_path=None):
         """Creează o aplicație Excel Lite pentru a deschide și vizualiza fișiere xlsx"""
@@ -268,51 +767,7 @@ class Windows95Desktop:
                               command=lambda: filter_data())
         filter_btn.pack(side="left", padx=5, pady=2)
         
-        # Main content frame
-        content_frame = tk.Frame(excel_window, bg="white")
-        content_frame.pack(fill="both", expand=True, padx=5, pady=5)
-        
-        # Create a frame for column letters
-        col_header_frame = tk.Frame(content_frame, bg="#e0e0e0", height=20)
-        col_header_frame.pack(fill="x")
-        
-        # Create a frame for row numbers and spreadsheet
-        row_frame = tk.Frame(content_frame, bg="white")
-        row_frame.pack(fill="both", expand=True)
-        
-        # Row numbers frame
-        row_header_frame = tk.Frame(row_frame, bg="#e0e0e0", width=30)
-        row_header_frame.pack(side="left", fill="y")
-        
-        # Main spreadsheet frame with scrollbars
-        sheet_frame = tk.Frame(row_frame, bg="white")
-        sheet_frame.pack(side="left", fill="both", expand=True)
-        
-        # Scrollbars
-        h_scrollbar = tk.Scrollbar(content_frame, orient="horizontal")
-        h_scrollbar.pack(side="bottom", fill="x")
-        
-        v_scrollbar = tk.Scrollbar(sheet_frame)
-        v_scrollbar.pack(side="right", fill="y")
-        
-        # Canvas for the spreadsheet
-        sheet_canvas = tk.Canvas(sheet_frame, bg="white", 
-                                xscrollcommand=h_scrollbar.set,
-                                yscrollcommand=v_scrollbar.set)
-        sheet_canvas.pack(fill="both", expand=True)
-        
-        h_scrollbar.config(command=sheet_canvas.xview)
-        v_scrollbar.config(command=sheet_canvas.yview)
-        
-        # Frame inside canvas for cells
-        cells_frame = tk.Frame(sheet_canvas, bg="white")
-        sheet_canvas.create_window((0, 0), window=cells_frame, anchor="nw")
-        
-        # Frame for column headers
-        column_headers_frame = tk.Frame(col_header_frame, bg="#e0e0e0")
-        column_headers_frame.pack(side="left", fill="x", expand=True, padx=(30, 0))
-        
-        # Status bar
+        # Status bar - adăugat înainte de conținutul principal
         status_frame = tk.Frame(excel_window, bg="#c0c0c0", relief="sunken", bd=1, height=25)
         status_frame.pack(side="bottom", fill="x")
         status_frame.pack_propagate(False)
@@ -323,6 +778,38 @@ class Windows95Desktop:
         cell_info_label = tk.Label(status_frame, text="", bg="#c0c0c0", font=("MS Sans Serif", 8))
         cell_info_label.pack(side="right", padx=5)
         
+        # Main content frame
+        content_frame = tk.Frame(excel_window, bg="white")
+        content_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        # Scrollbars
+        h_scrollbar = tk.Scrollbar(content_frame, orient="horizontal")
+        h_scrollbar.pack(side="bottom", fill="x")
+        
+        # Main table frame
+        table_frame = tk.Frame(content_frame, bg="white")
+        table_frame.pack(fill="both", expand=True)
+        
+        v_scrollbar = tk.Scrollbar(table_frame)
+        v_scrollbar.pack(side="right", fill="y")
+        
+        # Canvas for scrollable content
+        canvas = tk.Canvas(table_frame, bg="white", 
+                         xscrollcommand=h_scrollbar.set,
+                         yscrollcommand=v_scrollbar.set)
+        canvas.pack(side="left", fill="both", expand=True)
+        
+        h_scrollbar.config(command=canvas.xview)
+        v_scrollbar.config(command=canvas.yview)
+        
+        # Frame inside canvas for grid
+        inner_frame = tk.Frame(canvas, bg="white")
+        canvas.create_window((0, 0), window=inner_frame, anchor="nw")
+        
+        # Eliminăm spațiile între celule
+        inner_frame.grid_columnconfigure("all", pad=0)
+        inner_frame.grid_rowconfigure("all", pad=0)
+        
         # Variables for tracking
         current_file = None
         workbook = None
@@ -330,50 +817,66 @@ class Windows95Desktop:
         
         # Cell grid (for display only)
         cell_grid = []
+        header_labels = []  # Pentru a ține evidența label-urilor de header
         
         # Max rows and columns to display
         MAX_ROWS = 100
         MAX_COLS = 26  # A-Z
         
+        # Variabile pentru redimensionarea coloanelor
+        resizing_column = None
+        start_x = 0
+        column_widths = [10] * (MAX_COLS + 1)  # Lățimea inițială pentru fiecare coloană (inclusiv header-ul de rând)
+        
         def clear_sheet():
             """Clear the current sheet display"""
-            for widget in cells_frame.winfo_children():
+            for widget in inner_frame.winfo_children():
                 widget.destroy()
             
-            for widget in column_headers_frame.winfo_children():
-                widget.destroy()
-                
-            for widget in row_header_frame.winfo_children():
-                widget.destroy()
-            
-            nonlocal cell_grid
+            nonlocal cell_grid, header_labels
             cell_grid = []
+            header_labels = []
         
         def create_empty_sheet():
             """Create an empty spreadsheet grid"""
             clear_sheet()
             
-            # Create column headers (A, B, C, ...)
+            nonlocal header_labels, column_widths
+            header_labels = [None] * (MAX_COLS + 1)  # +1 pentru header-ul de rând
+            
+            # Creează header-ul cu coloanele (A, B, C, etc.)
+            header_label = tk.Label(inner_frame, text="", width=4, bg="#e0e0e0", 
+                                  relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"),
+                                  highlightthickness=0)  # Eliminăm highlightthickness
+            header_label.grid(row=0, column=0, sticky="nsew", padx=0, pady=0)  # Eliminăm padding
+            header_labels[0] = header_label
+            
             for col in range(MAX_COLS):
                 col_letter = chr(65 + col)  # A=65, B=66, etc.
-                header = tk.Label(column_headers_frame, text=col_letter, width=10, bg="#e0e0e0",
-                                relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"))
-                header.grid(row=0, column=col, sticky="nsew")
+                header = tk.Label(inner_frame, text=col_letter, width=column_widths[col+1], bg="#e0e0e0",
+                                relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"),
+                                highlightthickness=0)  # Eliminăm highlightthickness
+                header.grid(row=0, column=col+1, sticky="nsew", padx=0, pady=0)  # Eliminăm padding
+                header_labels[col+1] = header
+                
+                # Adaugă separator de redimensionare
+                add_column_resize_handle(header, col+1)
             
-            # Create row headers (1, 2, 3, ...)
-            for row in range(MAX_ROWS):
-                header = tk.Label(row_header_frame, text=str(row + 1), width=4, height=1,
-                                bg="#e0e0e0", relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"))
-                header.grid(row=row, column=0, sticky="nsew")
-            
-            # Create cells
+            # Creează rândurile și celulele
             row_widgets = []
             for row in range(MAX_ROWS):
+                # Creează header-ul pentru rând
+                row_header = tk.Label(inner_frame, text=str(row + 1), width=4, height=1,
+                                    bg="#e0e0e0", relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"),
+                                    highlightthickness=0)  # Eliminăm highlightthickness
+                row_header.grid(row=row+1, column=0, sticky="nsew", padx=0, pady=0)  # Eliminăm padding
+                
+                # Creează celulele pentru acest rând
                 col_widgets = []
                 for col in range(MAX_COLS):
-                    cell = tk.Entry(cells_frame, width=12, font=("MS Sans Serif", 8),
-                                  relief="sunken", bd=1)
-                    cell.grid(row=row, column=col, sticky="nsew")
+                    cell = tk.Entry(inner_frame, width=column_widths[col+1], font=("MS Sans Serif", 8),
+                                  relief="sunken", bd=1, highlightthickness=0)  # Eliminăm highlightthickness
+                    cell.grid(row=row+1, column=col+1, sticky="nsew", padx=0, pady=0)  # Eliminăm padding
                     
                     # Bind click to select cell
                     cell.bind("<Button-1>", lambda e, r=row, c=col: select_cell(r, c))
@@ -383,9 +886,71 @@ class Windows95Desktop:
             
             cell_grid = row_widgets
             
+            # Configurează coloanele pentru dimensiune uniformă
+            for col in range(MAX_COLS + 1):  # +1 pentru coloana cu header-ele de rând
+                inner_frame.grid_columnconfigure(col, weight=1, pad=0)  # Setăm explicit pad=0
+            
+            # Configurează rândurile pentru a elimina spațiile
+            for row in range(MAX_ROWS + 1):  # +1 pentru rândul cu header-ele de coloane
+                inner_frame.grid_rowconfigure(row, pad=0)  # Setăm explicit pad=0
+            
             # Update canvas scroll region
-            cells_frame.update_idletasks()
-            sheet_canvas.config(scrollregion=sheet_canvas.bbox("all"))
+            inner_frame.update_idletasks()
+            canvas.config(scrollregion=canvas.bbox("all"))
+        
+        def add_column_resize_handle(header, col_idx):
+            """Adaugă un handler pentru redimensionarea coloanei"""
+            
+            def start_resize(event):
+                nonlocal resizing_column, start_x
+                resizing_column = col_idx
+                start_x = event.x_root
+                # Schimbă cursorul pentru a indica redimensionarea
+                excel_window.config(cursor="sb_h_double_arrow")
+                
+            def stop_resize(event):
+                nonlocal resizing_column
+                resizing_column = None
+                # Resetează cursorul
+                excel_window.config(cursor="")
+                
+            def do_resize(event):
+                nonlocal column_widths, start_x
+                if resizing_column is not None:
+                    # Calculează diferența în pixeli
+                    delta_x = event.x_root - start_x
+                    
+                    # Convertește în unități de lățime (aproximativ 7 pixeli per caracter)
+                    delta_width = delta_x // 7
+                    
+                    if delta_width != 0:
+                        # Ajustează lățimea coloanei (minim 3 caractere)
+                        new_width = max(3, column_widths[resizing_column] + delta_width)
+                        column_widths[resizing_column] = new_width
+                        
+                        # Actualizează header-ul
+                        header_labels[resizing_column].config(width=new_width)
+                        
+                        # Actualizează toate celulele din coloană
+                        for row in range(MAX_ROWS):
+                            if row < len(cell_grid) and resizing_column-1 < len(cell_grid[row]):
+                                cell_grid[row][resizing_column-1].config(width=new_width)
+                        
+                        # Resetează start_x pentru următoarea mișcare
+                        start_x = event.x_root
+                        
+                        # Update canvas scroll region
+                        inner_frame.update_idletasks()
+                        canvas.config(scrollregion=canvas.bbox("all"))
+            
+            # Creează un frame pentru zona de redimensionare (marginea dreaptă a header-ului)
+            resize_frame = tk.Frame(inner_frame, bg="gray", width=2, cursor="sb_h_double_arrow")
+            resize_frame.grid(row=0, column=col_idx, sticky="nse", padx=(0, 0))
+            
+            # Bind evenimente pentru redimensionare
+            resize_frame.bind("<Button-1>", start_resize)
+            resize_frame.bind("<ButtonRelease-1>", stop_resize)
+            excel_window.bind("<B1-Motion>", do_resize)
         
         def select_cell(row, col):
             """Select a cell and show its address in the status bar"""
@@ -405,31 +970,46 @@ class Windows95Desktop:
             max_row = min(sheet.max_row, MAX_ROWS)
             max_col = min(sheet.max_column, MAX_COLS)
             
-            # Create column headers (A, B, C, ...)
+            nonlocal header_labels, column_widths
+            header_labels = [None] * (MAX_COLS + 1)  # +1 pentru header-ul de rând
+            
+            # Creează header-ul cu coloanele (A, B, C, etc.)
+            header_label = tk.Label(inner_frame, text="", width=4, bg="#e0e0e0", 
+                                  relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"),
+                                  highlightthickness=0)  # Eliminăm highlightthickness
+            header_label.grid(row=0, column=0, sticky="nsew", padx=0, pady=0)  # Eliminăm padding
+            header_labels[0] = header_label
+            
             for col in range(max_col):
                 col_letter = chr(65 + col)  # A=65, B=66, etc.
-                header = tk.Label(column_headers_frame, text=col_letter, width=10, bg="#e0e0e0",
-                                relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"))
-                header.grid(row=0, column=col, sticky="nsew")
+                header = tk.Label(inner_frame, text=col_letter, width=column_widths[col+1], bg="#e0e0e0",
+                                relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"),
+                                highlightthickness=0)  # Eliminăm highlightthickness
+                header.grid(row=0, column=col+1, sticky="nsew", padx=0, pady=0)  # Eliminăm padding
+                header_labels[col+1] = header
+                
+                # Adaugă separator de redimensionare
+                add_column_resize_handle(header, col+1)
             
-            # Create row headers (1, 2, 3, ...)
-            for row in range(max_row):
-                header = tk.Label(row_header_frame, text=str(row + 1), width=4, height=1,
-                                bg="#e0e0e0", relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"))
-                header.grid(row=row, column=0, sticky="nsew")
-            
-            # Create cells and populate with data
+            # Creează rândurile și celulele
             row_widgets = []
             for row in range(max_row):
+                # Creează header-ul pentru rând
+                row_header = tk.Label(inner_frame, text=str(row + 1), width=4, height=1,
+                                    bg="#e0e0e0", relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"),
+                                    highlightthickness=0)  # Eliminăm highlightthickness
+                row_header.grid(row=row+1, column=0, sticky="nsew", padx=0, pady=0)  # Eliminăm padding
+                
+                # Creează celulele pentru acest rând
                 col_widgets = []
                 for col in range(max_col):
                     cell_value = sheet.cell(row=row+1, column=col+1).value
                     cell_value = str(cell_value) if cell_value is not None else ""
                     
-                    cell = tk.Entry(cells_frame, width=10, font=("MS Sans Serif", 8),
-                                  relief="sunken", bd=1)
+                    cell = tk.Entry(inner_frame, width=column_widths[col+1], font=("MS Sans Serif", 8),
+                                  relief="sunken", bd=1, highlightthickness=0)  # Eliminăm highlightthickness
                     cell.insert(0, cell_value)
-                    cell.grid(row=row, column=col, sticky="nsew")
+                    cell.grid(row=row+1, column=col+1, sticky="nsew", padx=0, pady=0)  # Eliminăm padding
                     
                     # Bind click to select cell
                     cell.bind("<Button-1>", lambda e, r=row, c=col: select_cell(r, c))
@@ -440,9 +1020,17 @@ class Windows95Desktop:
             nonlocal cell_grid
             cell_grid = row_widgets
             
+            # Configurează coloanele pentru dimensiune uniformă și fără spații
+            for col in range(max_col + 1):  # +1 pentru coloana cu header-ele de rând
+                inner_frame.grid_columnconfigure(col, weight=1, pad=0)
+            
+            # Configurează rândurile pentru a elimina spațiile
+            for row in range(max_row + 1):  # +1 pentru rândul cu header-ele de coloane
+                inner_frame.grid_rowconfigure(row, pad=0)
+            
             # Update canvas scroll region
-            cells_frame.update_idletasks()
-            sheet_canvas.config(scrollregion=sheet_canvas.bbox("all"))
+            inner_frame.update_idletasks()
+            canvas.config(scrollregion=canvas.bbox("all"))
             
             status_label.config(text=f"Loaded sheet: {sheet.title}")
         
@@ -528,7 +1116,7 @@ class Windows95Desktop:
         view_menu.add_command(label="Freeze Panes", command=lambda: status_label.config(text="Freeze Panes not implemented"))
         
         # Help menu
-        help_menu.add_command(label="About Excel Lite", command=lambda: messagebox.showinfo("About", "Excel Lite\nVersion 1.0\n\nA simple spreadsheet viewer for Windows 95"))
+        help_menu.add_command(label="About Excel Lite", command=lambda: messagebox.showinfo("About", "Excel Lite\nVersion 1.0\n\nA simple spreadsheet viewer"))
         
         # If a file path was provided, open it
         if file_path and os.path.exists(file_path):
@@ -551,6 +1139,379 @@ class Windows95Desktop:
         self.add_window_to_taskbar("Excel Lite", excel_window)
         excel_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("Excel Lite", excel_window))
     
+    '''
+    def create_excel_lite(self, file_path=None):
+        """Creează o aplicație Excel Lite pentru a deschide și vizualiza fișiere xlsx"""
+        try:
+            import openpyxl
+        except ImportError:
+            messagebox.showerror("Error", "The openpyxl library is not installed. Please install it using pip: pip install openpyxl")
+            return
+
+        excel_window = tk.Toplevel(self.rootW95dist)
+        excel_window.title("Excel Lite")
+        excel_window.overrideredirect(True)
+        excel_window.geometry("800x600+200+100")
+        excel_window.configure(bg="#c0c0c0")
+        
+        # Add Windows 95 style title bar
+        title_bar = tk.Frame(excel_window, bg="#000080", height=25)
+        title_bar.pack(fill="x", side="top")
+        title_label = tk.Label(title_bar, text="Excel Lite", fg="white", bg="#000080",
+                              font=("MS Sans Serif", 8, "bold"))
+        title_label.pack(side="left", padx=5, pady=2)
+        
+        # Close button for title bar
+        close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                                font=("Arial", 8, "bold"), width=2, height=1,
+                                relief="raised", bd=1,
+                                command=lambda: self.close_window("Excel Lite", excel_window))
+        close_button.pack(side="right", padx=2, pady=1)
+        
+        self.make_window_draggable(excel_window, title_bar)
+        
+        # Menubar
+        menubar = tk.Menu(excel_window)
+        excel_window.config(menu=menubar)
+        
+        file_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="File", menu=file_menu)
+        
+        edit_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Edit", menu=edit_menu)
+        
+        view_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="View", menu=view_menu)
+        
+        help_menu = tk.Menu(menubar, tearoff=0)
+        menubar.add_cascade(label="Help", menu=help_menu)
+        
+        # Toolbar frame
+        toolbar_frame = tk.Frame(excel_window, bg="#c0c0c0", relief="raised", bd=2, height=35)
+        toolbar_frame.pack(fill="x")
+        toolbar_frame.pack_propagate(False)
+        
+        # Open button
+        open_btn = tk.Button(toolbar_frame, text="Open", bg="#c0c0c0", relief="raised", bd=2,
+                            font=("MS Sans Serif", 8),
+                            command=lambda: open_excel_file())
+        open_btn.pack(side="left", padx=5, pady=2)
+        
+        # Save button (for future implementation)
+        save_btn = tk.Button(toolbar_frame, text="Save", bg="#c0c0c0", relief="raised", bd=2,
+                            font=("MS Sans Serif", 8),
+                            command=lambda: save_excel_file())
+        save_btn.pack(side="left", padx=5, pady=2)
+        
+        # Sheet selection
+        sheet_label = tk.Label(toolbar_frame, text="Sheet:", bg="#c0c0c0", font=("MS Sans Serif", 8))
+        sheet_label.pack(side="left", padx=(20, 5))
+        
+        sheet_var = tk.StringVar()
+        sheet_combo = ttk.Combobox(toolbar_frame, textvariable=sheet_var, width=15, state="readonly")
+        sheet_combo.pack(side="left", padx=5)
+        sheet_combo.bind("<<ComboboxSelected>>", lambda e: show_sheet(sheet_var.get()))
+        
+        # Function buttons
+        formula_btn = tk.Button(toolbar_frame, text="Formula", bg="#c0c0c0", relief="raised", bd=2,
+                               font=("MS Sans Serif", 8),
+                               command=lambda: add_formula())
+        formula_btn.pack(side="left", padx=5, pady=2)
+        
+        sort_btn = tk.Button(toolbar_frame, text="Sort", bg="#c0c0c0", relief="raised", bd=2,
+                            font=("MS Sans Serif", 8),
+                            command=lambda: sort_data())
+        sort_btn.pack(side="left", padx=5, pady=2)
+        
+        filter_btn = tk.Button(toolbar_frame, text="Filter", bg="#c0c0c0", relief="raised", bd=2,
+                              font=("MS Sans Serif", 8),
+                              command=lambda: filter_data())
+        filter_btn.pack(side="left", padx=5, pady=2)
+        
+        # Status bar - adăugat înainte de conținutul principal
+        status_frame = tk.Frame(excel_window, bg="#c0c0c0", relief="sunken", bd=1, height=25)
+        status_frame.pack(side="bottom", fill="x")
+        status_frame.pack_propagate(False)
+        
+        status_label = tk.Label(status_frame, text="Ready", bg="#c0c0c0", font=("MS Sans Serif", 8))
+        status_label.pack(side="left", padx=5)
+        
+        cell_info_label = tk.Label(status_frame, text="", bg="#c0c0c0", font=("MS Sans Serif", 8))
+        cell_info_label.pack(side="right", padx=5)
+        
+        # Main content frame
+        content_frame = tk.Frame(excel_window, bg="white")
+        content_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        # Scrollbars
+        h_scrollbar = tk.Scrollbar(content_frame, orient="horizontal")
+        h_scrollbar.pack(side="bottom", fill="x")
+        
+        # Main table frame
+        table_frame = tk.Frame(content_frame, bg="white")
+        table_frame.pack(fill="both", expand=True)
+        
+        v_scrollbar = tk.Scrollbar(table_frame)
+        v_scrollbar.pack(side="right", fill="y")
+        
+        # Canvas for scrollable content
+        canvas = tk.Canvas(table_frame, bg="white", 
+                         xscrollcommand=h_scrollbar.set,
+                         yscrollcommand=v_scrollbar.set)
+        canvas.pack(side="left", fill="both", expand=True)
+        
+        h_scrollbar.config(command=canvas.xview)
+        v_scrollbar.config(command=canvas.yview)
+        
+        # Frame inside canvas for grid
+        inner_frame = tk.Frame(canvas, bg="white")
+        canvas.create_window((0, 0), window=inner_frame, anchor="nw")
+        
+        # Variables for tracking
+        current_file = None
+        workbook = None
+        active_sheet = None
+        
+        # Cell grid (for display only)
+        cell_grid = []
+        
+        # Max rows and columns to display
+        MAX_ROWS = 100
+        MAX_COLS = 26  # A-Z
+        
+        def clear_sheet():
+            """Clear the current sheet display"""
+            for widget in inner_frame.winfo_children():
+                widget.destroy()
+            
+            nonlocal cell_grid
+            cell_grid = []
+        
+        def create_empty_sheet():
+            """Create an empty spreadsheet grid"""
+            clear_sheet()
+            
+            # Definește o lățime fixă pentru toate celulele
+            CELL_WIDTH = 10
+            
+            # Creează header-ul cu coloanele (A, B, C, etc.)
+            header_label = tk.Label(inner_frame, text="", width=4, bg="#e0e0e0", 
+                                  relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"))
+            header_label.grid(row=0, column=0, sticky="nsew")
+            
+            for col in range(MAX_COLS):
+                col_letter = chr(65 + col)  # A=65, B=66, etc.
+                header = tk.Label(inner_frame, text=col_letter, width=CELL_WIDTH, bg="#e0e0e0",
+                                relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"))
+                header.grid(row=0, column=col+1, sticky="nsew")
+            
+            # Creează rândurile și celulele
+            row_widgets = []
+            for row in range(MAX_ROWS):
+                # Creează header-ul pentru rând
+                row_header = tk.Label(inner_frame, text=str(row + 1), width=4, height=1,
+                                    bg="#e0e0e0", relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"))
+                row_header.grid(row=row+1, column=0, sticky="nsew")
+                
+                # Creează celulele pentru acest rând
+                col_widgets = []
+                for col in range(MAX_COLS):
+                    cell = tk.Entry(inner_frame, width=CELL_WIDTH, font=("MS Sans Serif", 8),
+                                  relief="sunken", bd=1)
+                    cell.grid(row=row+1, column=col+1, sticky="nsew")
+                    
+                    # Bind click to select cell
+                    cell.bind("<Button-1>", lambda e, r=row, c=col: select_cell(r, c))
+                    
+                    col_widgets.append(cell)
+                row_widgets.append(col_widgets)
+            
+            cell_grid = row_widgets
+            
+            # Configurează coloanele pentru dimensiune uniformă
+            for col in range(MAX_COLS + 1):  # +1 pentru coloana cu header-ele de rând
+                inner_frame.grid_columnconfigure(col, weight=1)
+            
+            # Update canvas scroll region
+            inner_frame.update_idletasks()
+            canvas.config(scrollregion=canvas.bbox("all"))
+        
+        def select_cell(row, col):
+            """Select a cell and show its address in the status bar"""
+            col_letter = chr(65 + col)
+            cell_address = f"{col_letter}{row + 1}"
+            cell_info_label.config(text=f"Cell: {cell_address}")
+            
+            # Set focus to the cell
+            if 0 <= row < len(cell_grid) and 0 <= col < len(cell_grid[0]):
+                cell_grid[row][col].focus_set()
+        
+        def load_sheet_data(sheet):
+            """Load data from the workbook sheet into the grid"""
+            clear_sheet()
+            
+            # Get the dimensions of the sheet
+            max_row = min(sheet.max_row, MAX_ROWS)
+            max_col = min(sheet.max_column, MAX_COLS)
+            
+            # Definește o lățime fixă pentru toate celulele
+            CELL_WIDTH = 10
+            
+            # Creează header-ul cu coloanele (A, B, C, etc.)
+            header_label = tk.Label(inner_frame, text="", width=4, bg="#e0e0e0", 
+                                  relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"))
+            header_label.grid(row=0, column=0, sticky="nsew")
+            
+            for col in range(max_col):
+                col_letter = chr(65 + col)  # A=65, B=66, etc.
+                header = tk.Label(inner_frame, text=col_letter, width=CELL_WIDTH, bg="#e0e0e0",
+                                relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"))
+                header.grid(row=0, column=col+1, sticky="nsew")
+            
+            # Creează rândurile și celulele
+            row_widgets = []
+            for row in range(max_row):
+                # Creează header-ul pentru rând
+                row_header = tk.Label(inner_frame, text=str(row + 1), width=4, height=1,
+                                    bg="#e0e0e0", relief="raised", bd=1, font=("MS Sans Serif", 8, "bold"))
+                row_header.grid(row=row+1, column=0, sticky="nsew")
+                
+                # Creează celulele pentru acest rând
+                col_widgets = []
+                for col in range(max_col):
+                    cell_value = sheet.cell(row=row+1, column=col+1).value
+                    cell_value = str(cell_value) if cell_value is not None else ""
+                    
+                    cell = tk.Entry(inner_frame, width=CELL_WIDTH, font=("MS Sans Serif", 8),
+                                  relief="sunken", bd=1)
+                    cell.insert(0, cell_value)
+                    cell.grid(row=row+1, column=col+1, sticky="nsew")
+                    
+                    # Bind click to select cell
+                    cell.bind("<Button-1>", lambda e, r=row, c=col: select_cell(r, c))
+                    
+                    col_widgets.append(cell)
+                row_widgets.append(col_widgets)
+            
+            nonlocal cell_grid
+            cell_grid = row_widgets
+            
+            # Configurează coloanele pentru dimensiune uniformă
+            for col in range(max_col + 1):  # +1 pentru coloana cu header-ele de rând
+                inner_frame.grid_columnconfigure(col, weight=1)
+            
+            # Update canvas scroll region
+            inner_frame.update_idletasks()
+            canvas.config(scrollregion=canvas.bbox("all"))
+            
+            status_label.config(text=f"Loaded sheet: {sheet.title}")
+        
+        def open_excel_file():
+            """Open an Excel file"""
+            file_path = filedialog.askopenfilename(
+                defaultextension=".xlsx",
+                filetypes=[("Excel files", "*.xlsx"), ("All files", "*.*")]
+            )
+            
+            if not file_path:
+                return
+            
+            try:
+                # Load the Excel file
+                nonlocal workbook, current_file
+                workbook = openpyxl.load_workbook(file_path, data_only=True)
+                current_file = file_path
+                
+                # Update the sheet selector dropdown
+                sheet_names = workbook.sheetnames
+                sheet_combo['values'] = sheet_names
+                
+                if sheet_names:
+                    sheet_var.set(sheet_names[0])
+                    show_sheet(sheet_names[0])
+                
+                # Update window title
+                file_name = os.path.basename(file_path)
+                title_label.config(text=f"Excel Lite - {file_name}")
+                excel_window.title(f"Excel Lite - {file_name}")
+                
+                status_label.config(text=f"Opened: {file_name}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Could not open Excel file: {str(e)}")
+        
+        def show_sheet(sheet_name):
+            """Show the selected sheet"""
+            if not workbook or sheet_name not in workbook.sheetnames:
+                return
+            
+            nonlocal active_sheet
+            active_sheet = workbook[sheet_name]
+            load_sheet_data(active_sheet)
+        
+        def save_excel_file():
+            """Save the Excel file (placeholder for future implementation)"""
+            if not current_file or not workbook:
+                messagebox.showinfo("Info", "No file is currently open")
+                return
+            
+            messagebox.showinfo("Info", "Save functionality is not implemented in this version")
+        
+        def add_formula():
+            """Add a formula to the selected cell (placeholder)"""
+            messagebox.showinfo("Info", "Formula functionality is not implemented in this version")
+        
+        def sort_data():
+            """Sort data in the selected column (placeholder)"""
+            messagebox.showinfo("Info", "Sort functionality is not implemented in this version")
+        
+        def filter_data():
+            """Filter data in the selected column (placeholder)"""
+            messagebox.showinfo("Info", "Filter functionality is not implemented in this version")
+        
+        # Create empty sheet by default
+        create_empty_sheet()
+        
+        # File menu commands
+        file_menu.add_command(label="New", command=create_empty_sheet)
+        file_menu.add_command(label="Open", command=open_excel_file)
+        file_menu.add_command(label="Save", command=save_excel_file)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=lambda: self.close_window("Excel Lite", excel_window))
+        
+        # Edit menu commands
+        edit_menu.add_command(label="Cut", command=lambda: status_label.config(text="Cut not implemented"))
+        edit_menu.add_command(label="Copy", command=lambda: status_label.config(text="Copy not implemented"))
+        edit_menu.add_command(label="Paste", command=lambda: status_label.config(text="Paste not implemented"))
+        
+        # View menu
+        view_menu.add_command(label="Formulas", command=lambda: status_label.config(text="View Formulas not implemented"))
+        view_menu.add_command(label="Freeze Panes", command=lambda: status_label.config(text="Freeze Panes not implemented"))
+        
+        # Help menu
+        help_menu.add_command(label="About Excel Lite", command=lambda: messagebox.showinfo("About", "Excel Lite\nVersion 1.0\n\nA simple spreadsheet viewer"))
+        
+        # If a file path was provided, open it
+        if file_path and os.path.exists(file_path):
+            current_file = file_path
+            try:
+                workbook = openpyxl.load_workbook(file_path, data_only=True)
+                sheet_names = workbook.sheetnames
+                sheet_combo['values'] = sheet_names
+                if sheet_names:
+                    sheet_var.set(sheet_names[0])
+                    show_sheet(sheet_names[0])
+                
+                # Update window title
+                file_name = os.path.basename(file_path)
+                title_label.config(text=f"Excel Lite - {file_name}")
+            except Exception as e:
+                messagebox.showerror("Error", f"Could not open Excel file: {str(e)}")
+        
+        # Add to taskbar
+        self.add_window_to_taskbar("Excel Lite", excel_window)
+        excel_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("Excel Lite", excel_window))
+    
+    '''
     def create_file_explorer(self, path=None):
         """Creează un explorer de fișiere care arată și permite gestionarea fișierelor și directoarelor"""
         from tkinter import simpledialog
