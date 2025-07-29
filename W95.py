@@ -65,6 +65,7 @@ class Windows95Desktop:
         self.create_desktop_icon("Paint", 50, 400, "paint")
         self.create_desktop_icon("Excel Lite", 50, 470, "excel")
         self.create_desktop_icon("Word Lite", 50, 540, "word")
+        self.create_desktop_icon("Command Prompt", 50, 610, "terminal")
     
     def make_window_draggable(self, window, title_bar):
         """Make a window draggable by its title bar"""
@@ -154,6 +155,11 @@ class Windows95Desktop:
             icon_canvas.create_line(9, 15, 23, 15, fill="#FFFFFF", width=1)
             icon_canvas.create_line(9, 19, 23, 19, fill="#FFFFFF", width=1)
             icon_canvas.create_line(9, 23, 18, 23, fill="#FFFFFF", width=1)
+        elif icon_type == "terminal":
+            # Desenează un simbol pentru Command Prompt
+            icon_canvas.create_rectangle(6, 6, 26, 26, fill="#000000", outline="#404040")
+            # Simbolul prompt-ului >_
+            icon_canvas.create_text(16, 16, text=">_", fill="#FFFFFF", font=("Courier", 10, "bold"))
         
         # Label pentru numele iconitei
         label = tk.Label(icon_frame, text=name, bg="#008080", fg="white", 
@@ -189,6 +195,9 @@ class Windows95Desktop:
         elif icon_type == "word":
             if not any(title == "Word Lite" for title, _, _ in self.open_windows):
                 self.create_word_lite()
+        elif icon_type == "terminal":
+            if not any(title == "Command Prompt" for title, _, _ in self.open_windows):
+                self.create_terminal()
         else:
             self.open_window(name)
     
@@ -523,23 +532,35 @@ class Windows95Desktop:
                     # Găsim toate elementele "w:t" care conțin text
                     text_content = ""
                     
-                    # Namespace-ul folosit de docx
-                    namespace = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+                    # Folosim un namespace simplificat
+                    namespace = {'w': '*'}  # Wildcards pentru namespace pentru a evita linkul URL
                     
-                    # Extragem textul din XML folosind XPath
-                    for paragraph in tree.findall('.//w:p', namespace):
-                        paragraph_text = ""
-                        for text_element in paragraph.findall('.//w:t', namespace):
-                            if text_element.text:
-                                paragraph_text += text_element.text
+                    # Încercăm mai multe abordări pentru a extrage textul
+                    try:
+                        # Abordarea 1: Extragem textul folosind XPath cu wildcard namespace
+                        for paragraph in tree.findall('.//{*}p'):
+                            paragraph_text = ""
+                            for text_element in paragraph.findall('.//{*}t'):
+                                if text_element.text:
+                                    paragraph_text += text_element.text
+                            
+                            text_content += paragraph_text + "\n"
                         
-                        text_content += paragraph_text + "\n"
+                        # Dacă nu am obținut text, încercăm o altă abordare
+                        if not text_content.strip():
+                            raise Exception("No text was found using the first approach.")
+                            
+                    except:
+                        # Abordarea 2: Extragem direct toate elementele de text
+                        for text_element in tree.findall('.//*'):
+                            if text_element.text and text_element.text.strip():
+                                text_content += text_element.text + "\n"
                     
                     return text_content
                 else:
-                    return "Nu s-a putut găsi conținutul documentului în arhivă."
+                    return "The document content could not be found in the archive."
             except Exception as e:
-                return f"Eroare la extragerea textului: {str(e)}"
+                return f"Error extracting text: {str(e)}"
         
         def extract_text_from_doc(doc_file):
             """Extrage text din fișier .doc (format binar vechi)"""
@@ -570,13 +591,13 @@ class Windows95Desktop:
                             if len(chunk) > 5:  # Ignorăm fragmentele prea scurte
                                 text += chunk + "\n"
                     except:
-                        text = "Nu s-a putut extrage text din documentul .doc.\n"
-                        text += "Formatul .doc este un format binar vechi și complex.\n"
-                        text += "Pentru rezultate mai bune, folosiți fișiere .docx sau .txt."
+                        text = "Text could not be extracted from document .doc.\n"
+                        text += "The .doc format is an old and complex binary format.\n"
+                        text += "For better results, use .docx or .txt files."
                     
                     return text
             except Exception as e:
-                return f"Eroare la deschiderea fișierului .doc: {str(e)}"
+                return f"Error opening the .doc file: {str(e)}"
         
         def open_document():
             """Open a Word document"""
@@ -678,6 +699,450 @@ class Windows95Desktop:
         # Add to taskbar
         self.add_window_to_taskbar("Word Lite", word_window)
         word_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("Word Lite", word_window))
+    
+    def create_terminal(self):
+        """Creează un terminal/command prompt care execută comenzi reale"""
+        import subprocess
+        import threading
+        import platform
+        import signal
+        import time
+        
+        terminal_window = tk.Toplevel(self.rootW95dist)
+        terminal_window.title("Command Prompt")
+        terminal_window.overrideredirect(True)
+        terminal_window.geometry("640x400+200+150")
+        terminal_window.configure(bg="#000000")
+        
+        # Add Windows 95 style title bar
+        title_bar = tk.Frame(terminal_window, bg="#000080", height=25)
+        title_bar.pack(fill="x", side="top")
+        title_label = tk.Label(title_bar, text="Command Prompt", fg="white", bg="#000080",
+                              font=("MS Sans Serif", 8, "bold"))
+        title_label.pack(side="left", padx=5, pady=2)
+        
+        # Close button for title bar
+        close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                                font=("Arial", 8, "bold"), width=2, height=1,
+                                relief="raised", bd=1,
+                                command=lambda: self.close_window("Command Prompt", terminal_window))
+        close_button.pack(side="right", padx=2, pady=1)
+        
+        self.make_window_draggable(terminal_window, title_bar)
+        
+        # Main content - Folosim un singur Text widget pentru tot
+        # în loc de a separa output și input
+        terminal_frame = tk.Frame(terminal_window, bg="black", bd=0)
+        terminal_frame.pack(fill="both", expand=True, padx=2, pady=2)
+        
+        # Scrollbars
+        v_scrollbar = tk.Scrollbar(terminal_frame)
+        v_scrollbar.pack(side="right", fill="y")
+        
+        # Text widget pentru afișarea atât a output-ului cât și pentru introducerea comenzilor
+        terminal_text = tk.Text(terminal_frame, wrap="word", bg="black", fg="#cccccc",
+                               insertbackground="white", font=("Courier New", 10),
+                               yscrollcommand=v_scrollbar.set)
+        terminal_text.pack(fill="both", expand=True)
+        v_scrollbar.config(command=terminal_text.yview)
+        
+        # Command history
+        command_history = []
+        history_index = 0
+        
+        # Poziția curentă de input (tag pentru a marca unde utilizatorul poate scrie)
+        input_pos = "1.0"
+        
+        # Prompt-ul utilizat
+        prompt = "> "
+        
+        # Get current OS
+        current_os = platform.system()
+        
+        # Referință la procesul curent
+        current_process = None
+        
+        # Flag pentru a ști dacă o comandă este în execuție
+        command_running = False
+        
+        # Inițializăm terminalul
+        terminal_text.insert("end", "Windows 95 Command Prompt\n")
+        terminal_text.insert("end", "Type 'help' for a list of commands.\n\n")
+        terminal_text.insert("end", f"Current directory: {os.getcwd()}\n\n")
+        terminal_text.insert("end", prompt)
+        
+        # Setăm poziția de input inițială
+        input_pos = terminal_text.index("end-1c")
+        terminal_text.mark_set("input_mark", input_pos)
+        terminal_text.mark_gravity("input_mark", "left")
+        
+        # Focusăm pe textbox
+        terminal_text.focus_set()
+        terminal_text.see("end")
+        
+        def get_command():
+            """Obține comanda curentă din terminal_text"""
+            input_start = terminal_text.index("input_mark")
+            input_end = terminal_text.index("end-1c")
+            return terminal_text.get(input_start, input_end)
+        
+        def stop_current_process():
+            """Oprește procesul curent dacă există"""
+            nonlocal current_process, command_running
+            
+            if current_process and command_running:
+                try:
+                    if current_os == "Windows":
+                        # În Windows, folosim taskkill pentru a termina procesul și subprocesele sale
+                        subprocess.run(f"taskkill /F /T /PID {current_process.pid}", shell=True)
+                    else:
+                        # În Unix/Linux, trimitem semnalul SIGTERM
+                        os.killpg(os.getpgid(current_process.pid), signal.SIGTERM)
+                    
+                    terminal_text.insert("end", "\n^C\nCommand terminated by user.\n")
+                    terminal_text.insert("end", prompt)
+                    input_pos = terminal_text.index("end-1c")
+                    terminal_text.mark_set("input_mark", input_pos)
+                    terminal_text.see("end")
+                    
+                    command_running = False
+                    current_process = None
+                    return True
+                except Exception as e:
+                    terminal_text.insert("end", f"\nError terminating process: {str(e)}\n")
+                    return False
+            return False
+        
+        def execute_command(command):
+            """Execută o comandă și afișează output-ul"""
+            nonlocal history_index, input_pos, current_process, command_running
+            
+            # Adaugă comanda la istoric
+            command_history.append(command)
+            history_index = len(command_history)
+            
+            # Adăugăm un newline după comandă
+            terminal_text.insert("end", "\n")
+            
+            # Procesăm exit command
+            if command.lower() in ["exit", "quit"]:
+                terminal_text.insert("end", "Closing Command Prompt...\n")
+                terminal_text.see("end")
+                terminal_window.after(500, lambda: self.close_window("Command Prompt", terminal_window))
+                return
+            
+            # Procesăm cd command intern
+            if command.lower().startswith("cd "):
+                try:
+                    path = command[3:].strip()
+                    if os.path.isdir(path):
+                        os.chdir(path)
+                        terminal_text.insert("end", f"Current directory changed to: {os.getcwd()}\n\n")
+                    else:
+                        terminal_text.insert("end", f"Directory not found: {path}\n\n")
+                except Exception as e:
+                    terminal_text.insert("end", f"Error: {str(e)}\n\n")
+                
+                terminal_text.insert("end", prompt)
+                input_pos = terminal_text.index("end-1c")
+                terminal_text.mark_set("input_mark", input_pos)
+                terminal_text.see("end")
+                return
+            
+            # Procesăm dir/ls command intern pentru formatare mai bună
+            if command.lower() in ["dir", "ls"]:
+                try:
+                    current_dir = os.getcwd()
+                    terminal_text.insert("end", f"Directory of {current_dir}\n\n")
+                    
+                    # Obținem fișierele și directoarele
+                    items = os.listdir(current_dir)
+                    
+                    # Afișăm mai întâi directoarele
+                    for item in sorted(items):
+                        item_path = os.path.join(current_dir, item)
+                        if os.path.isdir(item_path):
+                            try:
+                                # Obținem informații despre director
+                                item_time = os.path.getmtime(item_path)
+                                time_str = datetime.fromtimestamp(item_time).strftime('%Y-%m-%d %H:%M:%S')
+                                terminal_text.insert("end", f"{time_str}    <DIR>          {item}\n")
+                            except:
+                                terminal_text.insert("end", f"                <DIR>          {item}\n")
+                    
+                    # Apoi afișăm fișierele
+                    for item in sorted(items):
+                        item_path = os.path.join(current_dir, item)
+                        if os.path.isfile(item_path):
+                            try:
+                                # Obținem informații despre fișier
+                                item_size = os.path.getsize(item_path)
+                                item_time = os.path.getmtime(item_path)
+                                time_str = datetime.fromtimestamp(item_time).strftime('%Y-%m-%d %H:%M:%S')
+                                terminal_text.insert("end", f"{time_str}    {item_size:10} {item}\n")
+                            except:
+                                terminal_text.insert("end", f"                      ? {item}\n")
+                    
+                    terminal_text.insert("end", "\n")
+                except Exception as e:
+                    terminal_text.insert("end", f"Error: {str(e)}\n\n")
+                
+                terminal_text.insert("end", prompt)
+                input_pos = terminal_text.index("end-1c")
+                terminal_text.mark_set("input_mark", input_pos)
+                terminal_text.see("end")
+                return
+            
+            # Procesăm help command
+            if command.lower() == "help":
+                terminal_text.insert("end", "Available Commands:\n")
+                terminal_text.insert("end", "  help       - Display this help message\n")
+                terminal_text.insert("end", "  cd <dir>   - Change directory\n")
+                terminal_text.insert("end", "  dir        - List files and directories\n")
+                terminal_text.insert("end", "  ls         - List files and directories (alternative)\n")
+                terminal_text.insert("end", "  cls        - Clear screen\n")
+                terminal_text.insert("end", "  exit       - Exit Command Prompt\n")
+                terminal_text.insert("end", "\nOther standard system commands are also available.\n")
+                terminal_text.insert("end", "Press Ctrl+C to stop a running command or copy selected text.\n")
+                terminal_text.insert("end", "Press Ctrl+V to paste text from clipboard.\n\n")
+                
+                terminal_text.insert("end", prompt)
+                input_pos = terminal_text.index("end-1c")
+                terminal_text.mark_set("input_mark", input_pos)
+                terminal_text.see("end")
+                return
+            
+            # Procesăm clear/cls command
+            if command.lower() in ["cls", "clear"]:
+                terminal_text.delete("1.0", "end")
+                terminal_text.insert("end", "Windows 95 Command Prompt\n\n")
+                terminal_text.insert("end", prompt)
+                input_pos = terminal_text.index("end-1c")
+                terminal_text.mark_set("input_mark", input_pos)
+                terminal_text.see("end")
+                return
+            
+            # Rulăm comanda externă
+            def run_command():
+                nonlocal current_process, command_running
+                command_running = True
+                
+                try:
+                    # Determină shell și opțiuni în funcție de sistemul de operare
+                    if current_os == "Windows":
+                        # Creăm procesul cu pipe-uri pentru stdout și stderr
+                        current_process = subprocess.Popen(
+                            command, 
+                            shell=True, 
+                            stdout=subprocess.PIPE, 
+                            stderr=subprocess.PIPE,
+                            stdin=subprocess.PIPE,
+                            text=True,
+                            encoding='cp850',  # Windows Command Prompt encoding
+                            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                        )
+                    else:  # Linux/Mac
+                        current_process = subprocess.Popen(
+                            command,
+                            shell=True,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            stdin=subprocess.PIPE,
+                            text=True,
+                            preexec_fn=os.setsid  # Permite terminarea procesului și a subproceselor
+                        )
+                    
+                    # Citim output-ul și error-ul în mod continuu
+                    while command_running:
+                        # Verificăm dacă procesul s-a terminat
+                        if current_process.poll() is not None:
+                            break
+                        
+                        # Citim output disponibil fără să blocăm
+                        output_line = current_process.stdout.readline()
+                        if output_line:
+                            terminal_window.after(0, lambda line=output_line: append_output(line))
+                        
+                        # Citim error disponibil fără să blocăm
+                        error_line = current_process.stderr.readline()
+                        if error_line:
+                            terminal_window.after(0, lambda line=error_line: append_error(line))
+                        
+                        # Pauză scurtă pentru a nu supraîncărca CPU
+                        time.sleep(0.01)
+                    
+                    # După ce procesul s-a terminat, citim orice output rămas
+                    remaining_output, remaining_error = current_process.communicate()
+                    
+                    if remaining_output:
+                        terminal_window.after(0, lambda: append_output(remaining_output))
+                    
+                    if remaining_error:
+                        terminal_window.after(0, lambda: append_error(remaining_error))
+                    
+                    # Verificăm dacă procesul s-a terminat cu succes
+                    exit_code = current_process.returncode
+                    if exit_code != 0 and command_running:
+                        terminal_window.after(0, lambda: append_error(f"\nCommand exited with code {exit_code}\n"))
+                    
+                    # Comanda s-a terminat, adăugăm un nou prompt
+                    terminal_window.after(0, lambda: add_new_prompt())
+                    
+                    command_running = False
+                    current_process = None
+                    
+                except Exception as e:
+                    terminal_window.after(0, lambda: append_error(f"\nError executing command: {str(e)}\n"))
+                    terminal_window.after(0, lambda: add_new_prompt())
+                    command_running = False
+                    current_process = None
+            
+            def append_output(text):
+                terminal_text.insert("end", text)
+                terminal_text.see("end")
+            
+            def append_error(text):
+                terminal_text.insert("end", text)
+                terminal_text.see("end")
+            
+            def add_new_prompt():
+                nonlocal input_pos
+                terminal_text.insert("end", prompt)
+                input_pos = terminal_text.index("end-1c")
+                terminal_text.mark_set("input_mark", input_pos)
+                terminal_text.see("end")
+            
+            # Rulăm comanda într-un thread separat pentru a evita blocarea UI
+            command_thread = threading.Thread(target=run_command)
+            command_thread.daemon = True
+            command_thread.start()
+        
+        def copy_selected_text():
+            """Copiază textul selectat în clipboard"""
+            try:
+                selected_text = terminal_text.get("sel.first", "sel.last")
+                terminal_window.clipboard_clear()
+                terminal_window.clipboard_append(selected_text)
+                return True
+            except:
+                return False  # Nu există text selectat
+        
+        def paste_from_clipboard():
+            """Lipește text din clipboard la poziția curentă de input"""
+            try:
+                clipboard_text = terminal_window.clipboard_get()
+                terminal_text.insert("insert", clipboard_text)
+                return True
+            except:
+                return False  # Clipboard-ul este gol sau inaccesibil
+        
+        # Gestionăm tastele speciale și comenzile
+        def key_press(event):
+            nonlocal history_index
+            
+            # Ctrl+C: Copiere text selectat sau oprire comandă
+            if (event.state & 0x4) and event.keysym.lower() == "c":  # Ctrl+C
+                if not copy_selected_text():  # Încercăm să copiem textul selectat
+                    # Dacă nu există text selectat, oprim comanda curentă
+                    stop_current_process()
+                return "break"
+            
+            # Ctrl+V: Lipire din clipboard
+            if (event.state & 0x4) and event.keysym.lower() == "v":  # Ctrl+V
+                paste_from_clipboard()
+                return "break"
+            
+            # Verificăm dacă cursorul este după prompt
+            cursor_pos = terminal_text.index("insert")
+            if terminal_text.compare(cursor_pos, "<", "input_mark"):
+                # Cursorul este înainte de poziția de input, îl mutăm la final
+                terminal_text.mark_set("insert", "end")
+                return "break"
+            
+            # Return/Enter key - Execute command
+            if event.keysym == "Return":
+                command = get_command()
+                if command.strip():
+                    execute_command(command.strip())
+                return "break"
+            
+            # Backspace key - Do not delete beyond prompt
+            elif event.keysym == "BackSpace":
+                cursor_pos = terminal_text.index("insert")
+                if terminal_text.compare(cursor_pos, "<=", "input_mark"):
+                    return "break"
+            
+            # Up key - Navigate command history
+            elif event.keysym == "Up":
+                if command_history and history_index > 0:
+                    history_index -= 1
+                    # Ștergem comanda curentă
+                    terminal_text.delete("input_mark", "end-1c")
+                    # Inserăm comanda din istoric
+                    terminal_text.insert("input_mark", command_history[history_index])
+                return "break"
+            
+            # Down key - Navigate command history
+            elif event.keysym == "Down":
+                if command_history and history_index < len(command_history) - 1:
+                    history_index += 1
+                    # Ștergem comanda curentă
+                    terminal_text.delete("input_mark", "end-1c")
+                    # Inserăm comanda din istoric
+                    terminal_text.insert("input_mark", command_history[history_index])
+                elif history_index == len(command_history) - 1:
+                    history_index = len(command_history)
+                    # Ștergem comanda curentă
+                    terminal_text.delete("input_mark", "end-1c")
+                return "break"
+            
+            # Home key - Go to beginning of input
+            elif event.keysym == "Home":
+                terminal_text.mark_set("insert", "input_mark")
+                return "break"
+        
+        # Asigurăm-ne că nu se poate șterge input mark-ul sau textul anterior
+        def delete_check(event):
+            try:
+                if event.keysym == 'BackSpace':
+                    cursor_pos = terminal_text.index("insert")
+                    if terminal_text.compare(cursor_pos, "<=", "input_mark"):
+                        return "break"
+                elif event.keysym in ['Delete', 'KP_Delete']:
+                    try:
+                        sel_start = terminal_text.index("sel.first")
+                        if terminal_text.compare(sel_start, "<", "input_mark"):
+                            return "break"
+                    except:
+                        cursor_pos = terminal_text.index("insert")
+                        if terminal_text.compare(cursor_pos, "<", "input_mark"):
+                            return "break"
+            except:
+                pass
+        
+        # Curățăm resursele la închiderea ferestrei
+        def on_window_close():
+            # Oprim orice proces în execuție
+            stop_current_process()
+            # Închidem fereastra
+            self.close_window("Command Prompt", terminal_window)
+        
+        # Bind keys
+        terminal_text.bind("<Key>", key_press)
+        terminal_text.bind("<KeyPress-BackSpace>", delete_check)
+        terminal_text.bind("<KeyPress-Delete>", delete_check)
+        terminal_text.bind("<KeyPress-KP_Delete>", delete_check)
+        
+        # Make sure focus is on the terminal text
+        terminal_text.focus_set()
+        
+        # Add to taskbar
+        self.add_window_to_taskbar("Command Prompt", terminal_window)
+        terminal_window.protocol("WM_DELETE_WINDOW", on_window_close)
+        
+        # Bind window activation
+        terminal_window.bind("<Map>", lambda e: terminal_text.focus_set())
+        terminal_window.bind("<FocusIn>", lambda e: terminal_text.focus_set())
     
     def create_excel_lite(self, file_path=None):
         """Creează o aplicație Excel Lite pentru a deschide și vizualiza fișiere xlsx"""
