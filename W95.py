@@ -4914,16 +4914,19 @@ class Windows95Desktop:
     
     def create_calculator(self):
         calc_window = tk.Toplevel(self.rootW95dist)
-        calc_window.title("Calculator")
+        calc_window.title("Scientific Calculator")
         calc_window.overrideredirect(True)
-        calc_window.geometry("250x300+300+150")
+        calc_window.geometry("350x400+300+150")
         calc_window.configure(bg="#c0c0c0")
         calc_window.resizable(False, False)
+        
+        # Import math for scientific functions
+        import math
         
         # Add Windows 95 style title bar
         title_bar = tk.Frame(calc_window, bg="#000080", height=25)
         title_bar.pack(fill="x", side="top")
-        title_label = tk.Label(title_bar, text="Calculator", fg="white", bg="#000080",
+        title_label = tk.Label(title_bar, text="Scientific Calculator", fg="white", bg="#000080",
                               font=("MS Sans Serif", 8, "bold"))
         title_label.pack(side="left", padx=5, pady=2)
         
@@ -4931,7 +4934,7 @@ class Windows95Desktop:
         close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
                                 font=("Arial", 8, "bold"), width=2, height=1,
                                 relief="raised", bd=1,
-                                command=lambda: self.close_window("Calculator", calc_window))
+                                command=lambda: self.close_window("Scientific Calculator", calc_window))
         close_button.pack(side="right", padx=2, pady=1)
         
         self.make_window_draggable(calc_window, title_bar)
@@ -4940,85 +4943,379 @@ class Windows95Desktop:
         display_var = tk.StringVar()
         display_var.set("0")
         
-        display = tk.Entry(calc_window, textvariable=display_var, font=("Arial", 14),
-                          justify="right", state="readonly", bg="white")
-        display.pack(fill="x", padx=5, pady=5)
+        display = tk.Entry(calc_window, textvariable=display_var, font=("Arial", 16),
+                          justify="right", bd=2, relief="sunken", bg="white")
+        display.pack(fill="x", padx=10, pady=10)
+        
+        # Second display for equation
+        equation_var = tk.StringVar()
+        equation_var.set("")
+        equation_display = tk.Entry(calc_window, textvariable=equation_var, font=("Arial", 10),
+                                  justify="right", bd=2, relief="sunken", bg="#f0f0f0")
+        equation_display.pack(fill="x", padx=10, pady=(0, 5))
         
         # Calculator logic
-        calc_data = {"current": "0", "operator": None, "operand": None}
+        calc_data = {
+            "current": "0",         # Current number being entered
+            "first_operand": None,  # First operand for binary operations
+            "operator": None,       # Current operator
+            "result": None,         # Result of calculation
+            "clear_on_next": False, # Should clear display on next digit press
+            "memory": 0,            # Memory storage
+            "equation": "",         # Current equation
+            "degree_mode": True     # True for degrees, False for radians
+        }
         
-        def button_click(value):
-            if value.isdigit():
-                if calc_data["current"] == "0":
-                    calc_data["current"] = value
-                else:
-                    calc_data["current"] += value
-            elif value in ["+", "-", "*", "/"]:
-                if calc_data["operator"] and calc_data["operand"] is not None:
-                    calculate()
-                calc_data["operand"] = float(calc_data["current"])
-                calc_data["operator"] = value
-                calc_data["current"] = "0"
-            elif value == "=":
-                calculate()
-            elif value == "C":
-                calc_data["current"] = "0"
-                calc_data["operator"] = None
-                calc_data["operand"] = None
-            
+        # Button frames
+        button_master_frame = tk.Frame(calc_window, bg="#c0c0c0")
+        button_master_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        
+        # Memory and function frame
+        memory_frame = tk.Frame(button_master_frame, bg="#c0c0c0")
+        memory_frame.pack(fill="x", pady=(0, 5))
+        
+        # Mode switch
+        mode_var = tk.StringVar(value="DEG")
+        
+        def toggle_mode():
+            calc_data["degree_mode"] = not calc_data["degree_mode"]
+            mode_var.set("DEG" if calc_data["degree_mode"] else "RAD")
+        
+        mode_button = tk.Button(memory_frame, textvariable=mode_var, font=("Arial", 8),
+                              width=4, height=1, bg="#e0e0e0", relief="raised", bd=2,
+                              command=toggle_mode)
+        mode_button.pack(side="left", padx=2, pady=2)
+        
+        # Memory functions
+        def memory_clear():
+            calc_data["memory"] = 0
+            status_update("Memory cleared")
+        
+        def memory_recall():
+            calc_data["current"] = str(calc_data["memory"])
             display_var.set(calc_data["current"])
+            calc_data["clear_on_next"] = True
+            status_update("Memory recalled")
         
-        def calculate():
-            if calc_data["operator"] and calc_data["operand"] is not None:
-                try:
-                    current_val = float(calc_data["current"])
-                    if calc_data["operator"] == "+":
-                        result = calc_data["operand"] + current_val
-                    elif calc_data["operator"] == "-":
-                        result = calc_data["operand"] - current_val
-                    elif calc_data["operator"] == "*":
-                        result = calc_data["operand"] * current_val
-                    elif calc_data["operator"] == "/":
-                        if current_val != 0:
-                            result = calc_data["operand"] / current_val
-                        else:
-                            result = "Error"
-                    
-                    calc_data["current"] = str(result)
-                    calc_data["operator"] = None
-                    calc_data["operand"] = None
-                except:
-                    calc_data["current"] = "Error"
+        def memory_store():
+            try:
+                calc_data["memory"] = float(calc_data["current"])
+                status_update("Value stored in memory")
+            except ValueError:
+                status_update("Error: Cannot store value")
         
-        # Buttons frame
-        buttons_frame = tk.Frame(calc_window, bg="#c0c0c0")
-        buttons_frame.pack(fill="both", expand=True, padx=5, pady=5)
+        def memory_add():
+            try:
+                calc_data["memory"] += float(calc_data["current"])
+                status_update("Value added to memory")
+            except ValueError:
+                status_update("Error: Cannot add to memory")
         
-        # Button layout
-        buttons = [
-            ['C', '', '', '/'],
-            ['7', '8', '9', '*'],
-            ['4', '5', '6', '-'],
-            ['1', '2', '3', '+'],
-            ['0', '', '', '=']
+        def memory_subtract():
+            try:
+                calc_data["memory"] -= float(calc_data["current"])
+                status_update("Value subtracted from memory")
+            except ValueError:
+                status_update("Error: Cannot subtract from memory")
+        
+        # Memory buttons
+        memory_buttons = [
+            ("MC", memory_clear),
+            ("MR", memory_recall),
+            ("MS", memory_store),
+            ("M+", memory_add),
+            ("M-", memory_subtract)
         ]
         
-        for i, row in enumerate(buttons):
-            for j, btn_text in enumerate(row):
-                if btn_text:
-                    btn = tk.Button(buttons_frame, text=btn_text, font=("Arial", 12),
-                                   command=lambda t=btn_text: button_click(t),
-                                   bg="#e0e0e0", relief="raised", bd=2)
-                    btn.grid(row=i, column=j, sticky="nsew", padx=1, pady=1)
+        for text, cmd in memory_buttons:
+            btn = tk.Button(memory_frame, text=text, font=("Arial", 8),
+                          width=4, height=1, bg="#e0e0e0", relief="raised", bd=2,
+                          command=cmd)
+            btn.pack(side="left", padx=2, pady=2)
+        
+        # Function and number buttons frame
+        buttons_frame = tk.Frame(button_master_frame, bg="#c0c0c0")
+        buttons_frame.pack(fill="both", expand=True)
+        
+        # Scientific functions frame (top rows)
+        scientific_frame = tk.Frame(buttons_frame, bg="#c0c0c0")
+        scientific_frame.pack(fill="x")
+        
+        # Function to display status briefly
+        def status_update(message):
+            equation_var.set(message)
+            calc_window.after(1500, lambda: equation_var.set(calc_data["equation"]))
+        
+        # Scientific functions
+        def scientific_function(func_name):
+            try:
+                current_val = float(calc_data["current"])
+                result = 0
+                
+                if func_name == "sin":
+                    if calc_data["degree_mode"]:
+                        result = math.sin(math.radians(current_val))
+                    else:
+                        result = math.sin(current_val)
+                elif func_name == "cos":
+                    if calc_data["degree_mode"]:
+                        result = math.cos(math.radians(current_val))
+                    else:
+                        result = math.cos(current_val)
+                elif func_name == "tan":
+                    if calc_data["degree_mode"]:
+                        result = math.tan(math.radians(current_val))
+                    else:
+                        result = math.tan(current_val)
+                elif func_name == "log":
+                    result = math.log10(current_val)
+                elif func_name == "ln":
+                    result = math.log(current_val)
+                elif func_name == "square":
+                    result = current_val ** 2
+                elif func_name == "cube":
+                    result = current_val ** 3
+                elif func_name == "10^x":
+                    result = 10 ** current_val
+                elif func_name == "e^x":
+                    result = math.exp(current_val)
+                elif func_name == "1/x":
+                    if current_val == 0:
+                        raise ValueError("Division by zero")
+                    result = 1 / current_val
+                elif func_name == "sqrt":
+                    if current_val < 0:
+                        raise ValueError("Cannot take square root of negative number")
+                    result = math.sqrt(current_val)
+                elif func_name == "cbrt":
+                    result = current_val ** (1/3)
+                elif func_name == "fact":
+                    if current_val < 0 or not current_val.is_integer():
+                        raise ValueError("Factorial undefined for negative or non-integer")
+                    result = math.factorial(int(current_val))
+                
+                # Format result to avoid scientific notation for reasonable values
+                if abs(result) < 1e10 and abs(result) > 1e-10 or result == 0:
+                    # Round to avoid floating point issues but keep precision
+                    result = round(result, 10)
+                    # Remove trailing zeros for integers
+                    if result == int(result):
+                        result = int(result)
+                
+                calc_data["current"] = str(result)
+                display_var.set(calc_data["current"])
+                
+                # Update equation
+                func_display_names = {
+                    "sin": "sin", "cos": "cos", "tan": "tan",
+                    "log": "log", "ln": "ln", "square": "²",
+                    "cube": "³", "10^x": "10^", "e^x": "e^",
+                    "1/x": "1/", "sqrt": "√", "cbrt": "∛",
+                    "fact": "!"
+                }
+                
+                display_func = func_display_names.get(func_name, func_name)
+                if func_name in ["square", "cube", "fact"]:
+                    calc_data["equation"] = f"({current_val}){display_func} = {result}"
+                else:
+                    calc_data["equation"] = f"{display_func}({current_val}) = {result}"
+                    
+                equation_var.set(calc_data["equation"])
+                calc_data["clear_on_next"] = True
+                
+            except (ValueError, OverflowError, ZeroDivisionError) as e:
+                display_var.set("Error")
+                equation_var.set(str(e))
+                calc_data["current"] = "0"
+                calc_data["clear_on_next"] = True
+        
+        # Constants
+        def constant(const_name):
+            if const_name == "pi":
+                calc_data["current"] = str(math.pi)
+                display_var.set(calc_data["current"])
+                calc_data["equation"] = f"π = {math.pi}"
+                equation_var.set(calc_data["equation"])
+                calc_data["clear_on_next"] = True
+        
+        # Scientific function buttons
+        scientific_buttons = [
+            ("sin", lambda: scientific_function("sin")),
+            ("cos", lambda: scientific_function("cos")),
+            ("tan", lambda: scientific_function("tan")),
+            ("log", lambda: scientific_function("log")),
+            ("ln", lambda: scientific_function("ln")),
+            
+            ("x²", lambda: scientific_function("square")),
+            ("x³", lambda: scientific_function("cube")),
+            ("xʸ", lambda: button_click("^")),
+            ("10ˣ", lambda: scientific_function("10^x")),
+            ("eˣ", lambda: scientific_function("e^x")),
+            
+            ("1/x", lambda: scientific_function("1/x")),
+            ("√x", lambda: scientific_function("sqrt")),
+            ("∛x", lambda: scientific_function("cbrt")),
+            ("n!", lambda: scientific_function("fact")),
+            ("π", lambda: constant("pi"))
+        ]
+        
+        # Create scientific buttons in a 3x5 grid
+        for i, (text, cmd) in enumerate(scientific_buttons):
+            row = i // 5
+            col = i % 5
+            btn = tk.Button(scientific_frame, text=text, font=("Arial", 9),
+                          width=5, height=1, bg="#d0d0d0", relief="raised", bd=2,
+                          command=cmd)
+            btn.grid(row=row, column=col, padx=2, pady=2, sticky="nsew")
+        
+        # Main calculator buttons frame
+        calc_frame = tk.Frame(buttons_frame, bg="#c0c0c0")
+        calc_frame.pack(fill="both", expand=True, pady=(5, 0))
+        
+        # Basic button handler
+        def button_click(value):
+            if calc_data["clear_on_next"] and value in "0123456789.":
+                calc_data["current"] = "0"
+                calc_data["clear_on_next"] = False
+                
+            if value.isdigit() or value == '.':
+                if calc_data["current"] == "0" and value != '.':
+                    calc_data["current"] = value
+                else:
+                    # Check if already has decimal point
+                    if value == '.' and '.' in calc_data["current"]:
+                        return
+                    calc_data["current"] += value
+            elif value in ['+', '-', '*', '/', '^', '%']:
+                # Store the current number and operator
+                calc_data["first_operand"] = float(calc_data["current"])
+                calc_data["operator"] = value
+                calc_data["equation"] = f"{calc_data['first_operand']} {value} "
+                equation_var.set(calc_data["equation"])
+                calc_data["current"] = "0"
+            elif value in ['(', ')']:
+                # Implement parentheses logic here (simplified for now)
+                calc_data["current"] += value
+                
+            display_var.set(calc_data["current"])
+        
+        # Change sign of current number
+        def negate_number():
+            try:
+                calc_data["current"] = str(-float(calc_data["current"]))
+                # Format for display (handle negative zero)
+                if calc_data["current"] == "-0.0":
+                    calc_data["current"] = "0"
+                display_var.set(calc_data["current"])
+            except ValueError:
+                display_var.set("Error")
+                calc_data["current"] = "0"
+        
+        # Clear all data
+        def clear_all():
+            calc_data["current"] = "0"
+            calc_data["first_operand"] = None
+            calc_data["operator"] = None
+            calc_data["result"] = None
+            calc_data["equation"] = ""
+            calc_data["clear_on_next"] = False
+            display_var.set(calc_data["current"])
+            equation_var.set(calc_data["equation"])
+        
+        # Perform calculation
+        def calculate():
+            try:
+                if calc_data["operator"] and calc_data["first_operand"] is not None:
+                    second_operand = float(calc_data["current"])
+                    
+                    if calc_data["operator"] == "+":
+                        result = calc_data["first_operand"] + second_operand
+                    elif calc_data["operator"] == "-":
+                        result = calc_data["first_operand"] - second_operand
+                    elif calc_data["operator"] == "*":
+                        result = calc_data["first_operand"] * second_operand
+                    elif calc_data["operator"] == "/":
+                        if second_operand == 0:
+                            raise ZeroDivisionError("Division by zero")
+                        result = calc_data["first_operand"] / second_operand
+                    elif calc_data["operator"] == "^":
+                        result = calc_data["first_operand"] ** second_operand
+                    elif calc_data["operator"] == "%":
+                        result = calc_data["first_operand"] % second_operand
+                    
+                    # Format result to avoid scientific notation for reasonable values
+                    if abs(result) < 1e10 and abs(result) > 1e-10 or result == 0:
+                        # Round to avoid floating point issues but keep precision
+                        result = round(result, 10)
+                        # Remove trailing zeros for integers
+                        if result == int(result):
+                            result = int(result)
+                    
+                    calc_data["equation"] = f"{calc_data['first_operand']} {calc_data['operator']} {second_operand} = {result}"
+                    equation_var.set(calc_data["equation"])
+                    
+                    calc_data["current"] = str(result)
+                    calc_data["first_operand"] = None
+                    calc_data["operator"] = None
+                    calc_data["result"] = result
+                    calc_data["clear_on_next"] = True
+                    
+                    display_var.set(calc_data["current"])
+            except Exception as e:
+                display_var.set("Error")
+                equation_var.set(str(e))
+                calc_data["current"] = "0"
+                calc_data["clear_on_next"] = True
+        
+        # Main calculator buttons layout
+        button_layout = [
+            ('(', ')', '%', 'C'),
+            ('7', '8', '9', '/'),
+            ('4', '5', '6', '*'),
+            ('1', '2', '3', '-'),
+            ('0', '.', '+/-', '+')
+        ]
+        
+        # Create main calculator buttons
+        for i, row in enumerate(button_layout):
+            for j, text in enumerate(row):
+                # Determine button color based on type
+                if text in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.']:
+                    bg_color = "#f0f0f0"  # Lighter color for digits
+                elif text in ['C', '+/-']:
+                    bg_color = "#ff9999"  # Red for special operations
+                else:
+                    bg_color = "#e0e0e0"  # Standard for operators
+                    
+                # Determine command based on button text
+                if text.isdigit() or text in ['.', '(', ')', '+', '-', '*', '/', '%']:
+                    cmd = lambda t=text: button_click(t)
+                elif text == 'C':
+                    cmd = clear_all
+                elif text == '+/-':
+                    cmd = negate_number
+                else:
+                    cmd = lambda: None  # Fallback
+                    
+                btn = tk.Button(calc_frame, text=text, font=("Arial", 12, "bold"),
+                              bg=bg_color, relief="raised", bd=2,
+                              command=cmd)
+                btn.grid(row=i, column=j, padx=2, pady=2, sticky="nsew")
+        
+        # Equal button (spans 2 columns)
+        btn = tk.Button(calc_frame, text="=", font=("Arial", 12, "bold"),
+                      bg="#66ccff", relief="raised", bd=2,
+                      command=calculate)
+        btn.grid(row=4, column=2, columnspan=2, padx=2, pady=2, sticky="nsew")
         
         # Configure grid weights
         for i in range(5):
-            buttons_frame.grid_rowconfigure(i, weight=1)
+            calc_frame.grid_rowconfigure(i, weight=1)
         for j in range(4):
-            buttons_frame.grid_columnconfigure(j, weight=1)
+            calc_frame.grid_columnconfigure(j, weight=1)
         
-        self.add_window_to_taskbar("Calculator", calc_window)
-        calc_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("Calculator", calc_window))
+        self.add_window_to_taskbar("Scientific Calculator", calc_window)
+        calc_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("Scientific Calculator", calc_window))
     
     def create_network_monitor(self):
         net_window = tk.Toplevel(self.rootW95dist)
