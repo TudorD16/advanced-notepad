@@ -56,16 +56,28 @@ class Windows95Desktop:
         self.desktop_frame = tk.Frame(self.rootW95dist, bg="#008080")
         self.desktop_frame.pack(fill="both", expand=True)
         
-        # Icoane pe desktop
-        self.create_desktop_icon("My Computer", 50, 50, "computer")
-        self.create_desktop_icon("Text Editor", 50, 120, "editor")
-        self.create_desktop_icon("Calculator", 50, 190, "calculator")
-        self.create_desktop_icon("Network Monitor", 50, 260, "network")
-        self.create_desktop_icon("Hardware Info", 50, 330, "hardware")
-        self.create_desktop_icon("Paint", 50, 400, "paint")
-        self.create_desktop_icon("Excel Lite", 50, 470, "excel")
-        self.create_desktop_icon("Word Lite", 50, 540, "word")
-        self.create_desktop_icon("Command Prompt", 50, 610, "terminal")
+        # Definește poziția x pentru stânga și dreapta
+        left_x = 50
+        right_x = self.rootW95dist.winfo_screenwidth() - 120
+
+        # Definește distanța y între icoane (pentru aliniere uniformă)
+        icon_spacing = 70
+
+        # Icoane pe desktop (partea stângă)
+        self.create_desktop_icon("My Computer", left_x, 50, "computer")
+        self.create_desktop_icon("Text Editor", left_x, 50 + icon_spacing, "editor")
+        self.create_desktop_icon("Calculator", left_x, 50 + icon_spacing * 2, "calculator")
+        self.create_desktop_icon("Network Monitor", left_x, 50 + icon_spacing * 3, "network")
+        self.create_desktop_icon("Hardware Info", left_x, 50 + icon_spacing * 4, "hardware")
+        self.create_desktop_icon("Paint", left_x, 50 + icon_spacing * 5, "paint")
+        self.create_desktop_icon("Excel Lite", left_x, 50 + icon_spacing * 6, "excel")
+        self.create_desktop_icon("Word Lite", left_x, 50 + icon_spacing * 7, "word")
+        self.create_desktop_icon("Command Prompt", left_x, 50 + icon_spacing * 8, "terminal")
+        self.create_desktop_icon("SQL Explorer", left_x, 50 + icon_spacing * 9, "database")
+
+        # Icoane pe desktop (partea dreaptă)
+        self.create_desktop_icon("Activate Product", right_x, 50, "activation")
+        self.create_desktop_icon("System Requirements", right_x, 50 + icon_spacing, "sysinfo")
     
     def make_window_draggable(self, window, title_bar):
         """Make a window draggable by its title bar"""
@@ -117,6 +129,12 @@ class Windows95Desktop:
             fill_color = "#ff6699"  # Roz pentru paint
         elif icon_type == "excel":
             fill_color = "#00cc66"
+        elif icon_type == "activation":
+            fill_color = "#ff6666"
+        elif icon_type == "database":
+            fill_color = "#3366cc"  # Albastru pentru database
+        elif icon_type == "sysinfo":
+            fill_color = "#5c5c5c"  # Gri închis pentru system info
         else:
             fill_color = "#c0c0c0"  # Gri standard
             
@@ -160,6 +178,23 @@ class Windows95Desktop:
             icon_canvas.create_rectangle(6, 6, 26, 26, fill="#000000", outline="#404040")
             # Simbolul prompt-ului >_
             icon_canvas.create_text(16, 16, text=">_", fill="#FFFFFF", font=("Courier", 10, "bold"))
+        elif icon_type == "activation":
+            # Desenează un simbol pentru activare (un cheie sau un lacăt)
+            icon_canvas.create_rectangle(8, 8, 24, 24, fill="#ffcc00", outline="#000000")
+            icon_canvas.create_line(16, 8, 16, 16, fill="#000000", width=2)  # Partea superioară a cheii
+            icon_canvas.create_rectangle(12, 16, 20, 20, fill="#ffcc00", outline="#000000")  # Partea inferioară a cheii
+        elif icon_type == "database":
+            # Desenează un simbol pentru bază de date
+            icon_canvas.create_rectangle(8, 10, 24, 26, fill="#3366cc", outline="#000000")
+            # Linii orizontale pentru a reprezenta înregistrările
+            icon_canvas.create_line(10, 14, 22, 14, fill="#ffffff", width=1)
+            icon_canvas.create_line(10, 18, 22, 18, fill="#ffffff", width=1)
+            icon_canvas.create_line(10, 22, 22, 22, fill="#ffffff", width=1)
+        elif icon_type == "sysinfo":
+            # Desenează un simbol pentru informații sistem
+            icon_canvas.create_rectangle(8, 8, 24, 24, fill="#5c5c5c", outline="#000000")
+            # Desenează un simbol "i" pentru informații
+            icon_canvas.create_text(16, 16, text="i", fill="white", font=("Arial", 12, "bold"))
         
         # Label pentru numele iconitei
         label = tk.Label(icon_frame, text=name, bg="#008080", fg="white", 
@@ -198,8 +233,642 @@ class Windows95Desktop:
         elif icon_type == "terminal":
             if not any(title == "Command Prompt" for title, _, _ in self.open_windows):
                 self.create_terminal()
+        elif icon_type == "activation":
+            if not any(title == "Activation Wizard" for title, _, _ in self.open_windows):
+                self.create_activation_window()
+        elif icon_type == "database":
+            if not any(title == "SQL Explorer" for title, _, _ in self.open_windows):
+                self.open_sql_explorer()
+        elif icon_type == "sysinfo":
+            if not any(title == "System Requirements" for title, _, _ in self.open_windows):
+                self.create_about_window()
         else:
             self.open_window(name)
+    
+    def create_about_window(self):
+        about_window = tk.Toplevel(self.rootW95dist)
+        about_window.title("System Requirements")
+        about_window.overrideredirect(True)
+        about_window.geometry("700x300+300+200")
+        about_window.configure(bg="#c9c9c9")
+        
+        # Add Windows 95 style title bar
+        title_bar = tk.Frame(about_window, bg="#000080", height=25)
+        title_bar.pack(fill="x", side="top")
+        title_label = tk.Label(title_bar, text="System Requirements", fg="white", bg="#000080",
+                             font=("MS Sans Serif", 8, "bold"))
+        title_label.pack(side="left", padx=5, pady=2)
+        
+        # Close button for title bar
+        close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                               font=("Arial", 8, "bold"), width=2, height=1,
+                               relief="raised", bd=1,
+                               command=lambda: self.close_window("System Requirements", about_window))
+        close_button.pack(side="right", padx=2, pady=1)
+        
+        self.make_window_draggable(about_window, title_bar)
+        
+        # Obținem informațiile sistemului
+        sys_info = platform.uname()
+        system_version = sys_info.system
+        processor_info = platform.processor()
+        
+        # Specificațiile minime
+        min_os = "Windows 10 (x64)"
+        min_processor_speed = 1  # GHz
+        min_ram = 4  # GB
+        min_disk_space = 300  # MB
+        
+        # Obținem informațiile sistemului
+        os_version = sys_info.release
+        ram = psutil.virtual_memory().total / (1024 ** 3)  # RAM în GB
+        
+        # Încercăm să extragem viteza procesorului - acest lucru ar putea să nu funcționeze pe toate sistemele
+        try:
+            processor_speed = float(processor_info.split()[2].split('GHz')[0])  # extragem valoarea GHz
+        except (IndexError, ValueError):
+            processor_speed = 0  # Nu putem determina viteza
+        
+        is_x64 = sys_info.machine in ["x86_64", "AMD64"]  # Verificăm dacă este sistem x64 (AMD64 sau x86_64)
+        
+        # Verificăm dacă sistemul îndeplinește cerințele minime
+        meets_requirements = True
+        requirements_message = "System meets minimum requirements"
+        
+        if system_version != "Windows" or not is_x64:
+            meets_requirements = False
+            requirements_message = "Does not meet minimum requirements: OS is not Windows x64."
+        
+        # Verificăm versiunea (mai sigur)
+        try:
+            major_version = int(os_version.split('.')[0])
+            if major_version < 10:
+                meets_requirements = False
+                requirements_message = f"Does not meet minimum requirements: OS version is older than Windows 10 (Detected: Windows {major_version})."
+        except (ValueError, IndexError):
+            # Nu putem determina versiunea cu exactitate
+            pass
+        
+        if processor_speed < min_processor_speed and processor_speed > 0:  # Doar dacă am reușit să extrageam viteza
+            meets_requirements = False
+            requirements_message = "Does not meet minimum requirements: Processor speed is too low."
+        
+        # Verificăm RAM-ul
+        if ram < min_ram:
+            meets_requirements = False
+            requirements_message = "Does not meet minimum requirements: RAM is too low."
+        
+        # Verificăm dacă există suficient spațiu pe disc
+        try:
+            if system_version == "Windows":
+                disk_space = psutil.disk_usage('/').free / (1024 ** 2)  # spațiu liber în MB
+                if disk_space < min_disk_space:
+                    meets_requirements = False
+                    requirements_message = "Does not meet minimum requirements: Insufficient disk space."
+            else:
+                disk_space = psutil.disk_usage('/').free / (1024 ** 2)  # Pentru alte sisteme de operare
+        except:
+            disk_space = 0  # Nu putem determina spațiul pe disc
+        
+        # Creăm layout-ul pentru fereastra de 'About'
+        frame = tk.Frame(about_window, bg='#c9c9c9')
+        frame.pack(padx=10, pady=10)
+        
+        # Specificațiile minime
+        min_specs = tk.Label(frame, text=f"Minimum Requirements:\nOS: {min_os}\nProcessor: {min_processor_speed} GHz\nRAM: {min_ram} GB\nDisk space: {min_disk_space} MB free", 
+                           font=("Fixedsys", 12), bg='#c9c9c9')
+        min_specs.grid(row=0, column=0, padx=10, pady=10, sticky='w')
+        
+        # Specificațiile curente
+        current_specs = tk.Label(frame, text=f"Your System:\nOS: {system_version} {os_version} {sys_info.machine}\nProcessor: {processor_info}\nRAM: {ram:.2f} GB\nDisk space: {disk_space:.2f} MB free", 
+                               font=("Fixedsys", 12), bg='#c9c9c9')
+        current_specs.grid(row=0, column=1, padx=10, pady=10, sticky='w')
+        
+        # Mesajul de cerințe
+        color = "green" if meets_requirements else "red"
+        result_label = tk.Label(about_window, text=requirements_message, font=("Fixedsys", 14), fg=color, bg='#c9c9c9')
+        result_label.pack(pady=10)
+        
+        # Adăugăm un buton OK
+        ok_button = tk.Button(about_window, text="OK", font=("Fixedsys", 12), bg="#c0c0c0", 
+                            command=lambda: self.close_window("System Requirements", about_window))
+        ok_button.pack(pady=10)
+        
+        self.add_window_to_taskbar("System Requirements", about_window)
+        about_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("System Requirements", about_window))
+    
+    def create_activation_window(self):
+        window = tk.Toplevel(self.rootW95dist)
+        window.title("Activation Wizard")
+        window.overrideredirect(True)
+        window.geometry("400x200+300+200")
+        window.configure(bg="#c9c9c9")
+        
+        # Add Windows 95 style title bar
+        title_bar = tk.Frame(window, bg="#000080", height=25)
+        title_bar.pack(fill="x", side="top")
+        title_label = tk.Label(title_bar, text="Activation Wizard", fg="white", bg="#000080",
+                              font=("MS Sans Serif", 8, "bold"))
+        title_label.pack(side="left", padx=5, pady=2)
+        
+        # Close button for title bar
+        close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                                font=("Arial", 8, "bold"), width=2, height=1,
+                                relief="raised", bd=1,
+                                command=lambda: self.close_window("Activation Wizard", window))
+        close_button.pack(side="right", padx=2, pady=1)
+        
+        self.make_window_draggable(window, title_bar)
+        
+        # Mesaj
+        label = tk.Label(window, text="Enter your product key:", font=("Fixedsys"), bg="#c9c9c9")
+        label.pack(pady=10)
+        
+        # Câmp de introducere a cheii
+        product_key_entry = tk.Entry(window, font=("Fixedsys"), width=30, bd=5)
+        product_key_entry.pack(pady=5)
+        
+        # Butonul de activare (inițial dezactivat)
+        activate_button = tk.Button(
+            window, text="Activate", font=("Fixedsys"), state=tk.DISABLED, bd=5, bg="#c9c9c9", 
+            command=lambda: activate_product()
+        )
+        activate_button.pack(pady=5)
+        
+        # Butonul "Activate later" -> elimină aplicația din taskbar
+        later_button = tk.Button(
+            window, text="Activate later", font=("Fixedsys"), bd=5, bg="#c9c9c9", 
+            command=lambda: self.close_window("Activation Wizard", window)
+        )
+        later_button.pack(pady=5)
+        
+        # Funcție pentru activare
+        def activate_product():
+            product_key = product_key_entry.get()
+            valid_key = "R46BX-JHR2J-PG7ER-24QFG-MWKVR"
+            FOLDER_NAME = "Serial"
+            FILE_NAME = "product_key.lic95"
+            
+            if not os.path.exists(FOLDER_NAME):
+                try:
+                    os.makedirs(FOLDER_NAME)
+                except:
+                    pass
+                    
+            if product_key == valid_key:
+                file_path = os.path.join(FOLDER_NAME, FILE_NAME)
+                # Verificăm dacă fișierul există deja
+                if not os.path.exists(file_path):
+                    with open(file_path, "w") as file:
+                        file.write(valid_key)
+                messagebox.showinfo("Activation Successful", "Product has been activated successfully.")
+                self.close_window("Activation Wizard", window)
+            else:
+                messagebox.showerror("Activation Failed", "Invalid product key. Please try again.")
+                
+        # Funcție pentru validarea cheii în timp real
+        def validate_key(event):
+            if product_key_entry.get() == "R46BX-JHR2J-PG7ER-24QFG-MWKVR":
+                activate_button.config(state=tk.NORMAL)  # Activează butonul dacă cheia este corectă
+            else:
+                activate_button.config(state=tk.DISABLED)  # Dezactivează butonul dacă cheia e greșită
+                
+        product_key_entry.bind("<KeyRelease>", validate_key)  # Verifică validitatea în timp real
+        
+        self.add_window_to_taskbar("Activation Wizard", window)
+        window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("Activation Wizard", window))
+    
+    def open_sql_explorer(self):
+        # Create SQL Explorer window
+        sql_window = tk.Toplevel(self.rootW95dist)
+        sql_window.title("SQL Explorer")
+        sql_window.overrideredirect(True)
+        sql_window.geometry("800x600+200+100")
+        sql_window.configure(bg="#c0c0c0")
+        
+        # Add Windows 95 style title bar
+        title_bar = tk.Frame(sql_window, bg="#000080", height=25)
+        title_bar.pack(fill="x", side="top")
+        title_label = tk.Label(title_bar, text="SQL Explorer", fg="white", bg="#000080",
+                              font=("MS Sans Serif", 8, "bold"))
+        title_label.pack(side="left", padx=5, pady=2)
+        
+        # Close button for title bar
+        close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                                font=("Arial", 8, "bold"), width=2, height=1,
+                                relief="raised", bd=1,
+                                command=lambda: self.close_window("SQL Explorer", sql_window))
+        close_button.pack(side="right", padx=2, pady=1)
+        
+        self.make_window_draggable(sql_window, title_bar)
+        
+        # Import required modules for SQL Explorer
+        import sqlite3
+        import os
+        
+        class Win95SQLViewer:
+            def __init__(self, root):
+                self.root = root
+                
+                # Win95 color palette
+                self.colors = {
+                    "bg_main": "#c0c0c0",         # Classic Win95 gray background
+                    "bg_window": "#ffffff",        # Window background
+                    "text": "#000000",             # Black text
+                    "button_face": "#c0c0c0",      # Button face color
+                    "button_shadow": "#808080",    # Button shadow
+                    "button_highlight": "#ffffff", # Button highlight
+                    "button_text": "#000000",      # Button text
+                    "title_bg": "#000080",         # Title bar background (navy blue)
+                    "title_text": "#ffffff",       # Title bar text (white)
+                    "border": "#808080"            # Border color
+                }
+                
+                self.connection = None
+                self.current_table = None
+                
+                # Configure styles
+                self.setup_styles()
+                
+                # Create interface
+                self.create_widgets()
+                self.create_menu()
+            
+            def setup_styles(self):
+                # Set app font to match Win95 style
+                self.default_font = ("MS Sans Serif", 9)
+                
+                style = ttk.Style()
+                
+                # Configure treeview style
+                style.configure(
+                    "Treeview",
+                    background=self.colors["bg_window"],
+                    foreground=self.colors["text"],
+                    fieldbackground=self.colors["bg_window"],
+                    borderwidth=1,
+                    relief=tk.SUNKEN
+                )
+                
+                # Configure treeview heading
+                style.configure(
+                    "Treeview.Heading",
+                    background=self.colors["button_face"],
+                    foreground=self.colors["text"],
+                    relief=tk.RAISED,
+                    borderwidth=2,
+                    font=self.default_font
+                )
+                
+                # Configure scrollbar
+                style.configure(
+                    "TScrollbar",
+                    background=self.colors["button_face"],
+                    troughcolor=self.colors["bg_window"],
+                    borderwidth=2,
+                    relief=tk.RAISED,
+                    arrowsize=13
+                )
+                
+                # Configure combobox
+                style.configure(
+                    "TCombobox",
+                    background=self.colors["bg_window"],
+                    fieldbackground=self.colors["bg_window"],
+                    selectbackground=self.colors["title_bg"],
+                    selectforeground=self.colors["title_text"]
+                )
+            
+            def create_menu(self):
+                # Create classic Win95 menu style
+                menubar = tk.Menu(self.root, bg=self.colors["bg_main"], fg=self.colors["text"],
+                                activebackground=self.colors["title_bg"],
+                                activeforeground=self.colors["title_text"],
+                                relief=tk.RAISED, bd=1)
+                self.root.config(menu=menubar)
+                
+                # File menu
+                file_menu = tk.Menu(menubar, tearoff=0, bg=self.colors["bg_main"],
+                                    fg=self.colors["text"],
+                                    activebackground=self.colors["title_bg"],
+                                    activeforeground=self.colors["title_text"], bd=1)
+                file_menu.add_command(label="Open Database...", command=self.open_database)
+                file_menu.add_separator()
+                file_menu.add_command(label="Exit", command=self.root.destroy)
+                menubar.add_cascade(label="File", menu=file_menu)
+                
+                # Edit menu
+                edit_menu = tk.Menu(menubar, tearoff=0, bg=self.colors["bg_main"],
+                                fg=self.colors["text"],
+                                activebackground=self.colors["title_bg"],
+                                activeforeground=self.colors["title_text"], bd=1)
+                edit_menu.add_command(label="Refresh", command=self.refresh_tables)
+                edit_menu.add_command(label="Execute Query", command=self.execute_query)
+                menubar.add_cascade(label="Edit", menu=edit_menu)
+            
+            def create_widgets(self):
+                # Main window frame (inset look)
+                main_frame = tk.Frame(
+                    self.root, 
+                    bg=self.colors["bg_main"],
+                    bd=2,
+                    relief=tk.RAISED
+                )
+                main_frame.pack(fill=tk.BOTH, expand=True, padx=3, pady=28)  # Padding adjusted for title bar
+                
+                # Toolbar frame
+                toolbar = tk.Frame(main_frame, bg=self.colors["bg_main"], bd=0)
+                toolbar.pack(fill=tk.X, pady=(2, 5), padx=2)
+                
+                # Table selection frame
+                control_frame = tk.Frame(main_frame, bg=self.colors["bg_main"], bd=0)
+                control_frame.pack(fill=tk.X, pady=(0, 5), padx=5)
+                
+                # Table label
+                table_label = tk.Label(
+                    control_frame,
+                    text="Tables:",
+                    bg=self.colors["bg_main"],
+                    fg=self.colors["text"]
+                )
+                table_label.pack(side=tk.LEFT, padx=(0, 5))
+                
+                # Table dropdown with Win95 style
+                self.table_combo = ttk.Combobox(
+                    control_frame,
+                    state="readonly",
+                    width=30
+                )
+                self.table_combo.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+                self.table_combo.bind("<<ComboboxSelected>>", self.load_table)
+                
+                # Refresh button
+                refresh_button = self.create_win95_button(
+                    control_frame, 
+                    text="Refresh",
+                    command=self.refresh_tables
+                )
+                refresh_button.pack(side=tk.RIGHT, padx=2)
+                
+                # Query frame
+                query_frame = tk.Frame(main_frame, bg=self.colors["bg_main"], bd=0)
+                query_frame.pack(fill=tk.X, pady=(0, 5), padx=5)
+                
+                # Query label
+                query_label = tk.Label(
+                    query_frame,
+                    text="SQL Query:",
+                    bg=self.colors["bg_main"],
+                    fg=self.colors["text"]
+                )
+                query_label.pack(side=tk.LEFT, padx=(0, 5))
+                
+                # Query text entry (sunken, like Win95)
+                self.query_entry = tk.Entry(
+                    query_frame,
+                    bg=self.colors["bg_window"],
+                    fg=self.colors["text"],
+                    bd=2,
+                    relief=tk.SUNKEN,
+                    insertbackground=self.colors["text"],
+                    font=("Courier New", 10)
+                )
+                self.query_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+                
+                # Execute button
+                execute_button = self.create_win95_button(
+                    query_frame, 
+                    text="Execute",
+                    command=self.execute_query
+                )
+                execute_button.pack(side=tk.RIGHT, padx=2)
+                
+                # Frame for treeview
+                table_frame = tk.Frame(main_frame, bg=self.colors["bg_main"], bd=2, relief=tk.SUNKEN)
+                table_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=(0, 5))
+                
+                # Create treeview with scrollbars
+                self.tree = ttk.Treeview(table_frame)
+                self.tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+                
+                # Vertical scrollbar
+                vsb = ttk.Scrollbar(table_frame, orient="vertical", command=self.tree.yview)
+                vsb.pack(side=tk.RIGHT, fill=tk.Y)
+                self.tree.configure(yscrollcommand=vsb.set)
+                
+                # Horizontal scrollbar
+                hsb = ttk.Scrollbar(main_frame, orient="horizontal", command=self.tree.xview)
+                hsb.pack(side=tk.BOTTOM, fill=tk.X, padx=5, pady=(0, 5))
+                self.tree.configure(xscrollcommand=hsb.set)
+                
+                # Status bar
+                self.status_var = tk.StringVar()
+                self.status_var.set("Ready")
+                
+                # Status bar with Win95 inset look
+                status_frame = tk.Frame(main_frame, bd=2, relief=tk.SUNKEN)
+                status_frame.pack(side=tk.BOTTOM, fill=tk.X, padx=3, pady=3)
+                
+                self.status_bar = tk.Label(
+                    status_frame,
+                    textvariable=self.status_var,
+                    bg=self.colors["bg_main"],
+                    fg=self.colors["text"],
+                    anchor=tk.W,
+                    bd=1,
+                    padx=5,
+                    pady=2
+                )
+                self.status_bar.pack(fill=tk.X)
+            
+            def create_win95_button(self, parent, text, command):
+                """Create a button with typical Windows 95 appearance"""
+                button_frame = tk.Frame(parent, bd=2, relief=tk.RAISED)
+                
+                button = tk.Button(
+                    button_frame,
+                    text=text,
+                    bg=self.colors["button_face"],
+                    fg=self.colors["button_text"],
+                    activebackground=self.colors["button_face"],
+                    activeforeground=self.colors["button_text"],
+                    bd=2,
+                    width=10,
+                    command=command,
+                    relief=tk.RAISED,
+                    padx=6,
+                    pady=1,
+                    font=self.default_font
+                )
+                button.pack(padx=1, pady=1)
+                
+                # Windows 95 button press effect
+                button.bind("<ButtonPress-1>", lambda e: button_frame.config(relief=tk.SUNKEN))
+                button.bind("<ButtonRelease-1>", lambda e: button_frame.config(relief=tk.RAISED))
+                
+                return button_frame
+            
+            def open_database(self):
+                file_path = filedialog.askopenfilename(
+                    title="Open Database",
+                    filetypes=[("SQLite Files", "*.db *.sqlite *.sqlite3"), ("All Files", "*.*")]
+                )
+                
+                if file_path:
+                    try:
+                        if self.connection:
+                            self.connection.close()
+                        
+                        self.connection = sqlite3.connect(file_path)
+                        self.refresh_tables()
+                        self.status_var.set(f"Database: {os.path.basename(file_path)}")
+                        messagebox.showinfo("Success", "Database opened successfully!")
+                    except sqlite3.Error as e:
+                        messagebox.showerror("Error", f"Could not open database: {e}")
+                        self.status_var.set("Error opening database.")
+            
+            def refresh_tables(self):
+                if not self.connection:
+                    messagebox.showwarning("Warning", "No database is open!")
+                    return
+                
+                try:
+                    cursor = self.connection.cursor()
+                    cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+                    tables = cursor.fetchall()
+                    
+                    self.table_combo['values'] = [table[0] for table in tables]
+                    if tables:
+                        self.table_combo.current(0)
+                        self.load_table(None)
+                    else:
+                        messagebox.showinfo("Info", "No tables found in this database.")
+                        self.clear_tree()
+                except sqlite3.Error as e:
+                    messagebox.showerror("Error", f"Could not load tables: {e}")
+            
+            def load_table(self, event):
+                if not self.connection:
+                    return
+                
+                selected_table = self.table_combo.get()
+                if not selected_table:
+                    return
+                
+                self.current_table = selected_table
+                self.query_entry.delete(0, tk.END)
+                self.query_entry.insert(0, f"SELECT * FROM {selected_table}")
+                
+                try:
+                    cursor = self.connection.cursor()
+                    cursor.execute(f"PRAGMA table_info({selected_table})")
+                    columns = cursor.fetchall()
+                    
+                    cursor.execute(f"SELECT * FROM {selected_table} LIMIT 1000")
+                    rows = cursor.fetchall()
+                    
+                    self.display_data(columns, rows)
+                    self.status_var.set(f"Table: {selected_table} | {len(rows)} records")
+                except sqlite3.Error as e:
+                    messagebox.showerror("Error", f"Could not load table: {e}")
+            
+            def execute_query(self):
+                if not self.connection:
+                    messagebox.showwarning("Warning", "No database is open!")
+                    return
+                
+                query = self.query_entry.get().strip()
+                if not query:
+                    messagebox.showwarning("Warning", "Enter a valid query!")
+                    return
+                
+                try:
+                    cursor = self.connection.cursor()
+                    cursor.execute(query)
+                    
+                    if query.upper().startswith(("SELECT", "PRAGMA")):
+                        # Read query - display results
+                        columns = [description[0] for description in cursor.description]
+                        rows = cursor.fetchall()
+                        
+                        self.display_data_from_query(columns, rows)
+                        self.status_var.set(f"Query executed: {len(rows)} results")
+                    else:
+                        # Modification query - confirm transaction
+                        self.connection.commit()
+                        affected = cursor.rowcount
+                        messagebox.showinfo("Success", f"Query executed successfully! Rows affected: {affected}")
+                        
+                        # Refresh current table if exists
+                        if self.current_table:
+                            self.load_table(None)
+                        
+                        self.status_var.set(f"Query executed: {affected} rows affected")
+                except sqlite3.Error as e:
+                    messagebox.showerror("Error", f"Error executing query: {e}")
+            
+            def display_data(self, columns, rows):
+                self.clear_tree()
+                
+                # Configure treeview columns
+                column_names = [col[1] for col in columns]
+                
+                self.tree["columns"] = column_names
+                
+                # Hide default column
+                self.tree.column("#0", width=0, stretch=tk.NO)
+                
+                # Configure each column
+                for name in column_names:
+                    self.tree.column(name, anchor=tk.W, width=150)
+                    self.tree.heading(name, text=name, anchor=tk.W)
+                
+                # Add data
+                for i, row in enumerate(rows):
+                    values = [str(val) if val is not None else "NULL" for val in row]
+                    self.tree.insert("", tk.END, text=str(i), values=values, tags=('even' if i % 2 == 0 else 'odd',))
+                
+                # Alternate row colors (classic Win95 style)
+                self.tree.tag_configure('even', background=self.colors["bg_window"])
+                self.tree.tag_configure('odd', background="#ececec")  # Light gray for alternating rows
+            
+            def display_data_from_query(self, column_names, rows):
+                self.clear_tree()
+                
+                self.tree["columns"] = column_names
+                
+                # Hide default column
+                self.tree.column("#0", width=0, stretch=tk.NO)
+                
+                # Configure each column
+                for name in column_names:
+                    self.tree.column(name, anchor=tk.W, width=150)
+                    self.tree.heading(name, text=name, anchor=tk.W)
+                
+                # Add data
+                for i, row in enumerate(rows):
+                    values = [str(val) if val is not None else "NULL" for val in row]
+                    self.tree.insert("", tk.END, text=str(i), values=values, tags=('even' if i % 2 == 0 else 'odd',))
+                
+                # Alternate row colors
+                self.tree.tag_configure('even', background=self.colors["bg_window"])
+                self.tree.tag_configure('odd', background="#ececec")
+            
+            def clear_tree(self):
+                for item in self.tree.get_children():
+                    self.tree.delete(item)
+                
+                for col in self.tree["columns"]:
+                    self.tree.heading(col, text="")
+                
+                self.tree["columns"] = []
+        
+        # Create the SQL viewer instance and pass the toplevel window
+        sql_app = Win95SQLViewer(sql_window)
+        
+        # Add to taskbar
+        self.add_window_to_taskbar("SQL Explorer", sql_window)
+        sql_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("SQL Explorer", sql_window))
     
     '''
     def create_word_lite(self, file_path=None):
@@ -4426,11 +5095,16 @@ class Windows95Desktop:
         self.clock_label.pack(padx=5, pady=1)
     
     def setup_clock(self):
+        # def update_clock():
+            # current_time = time.strftime("%H:%M")
+            # current_date = time.strftime("%d/%m/%Y")
+            # self.clock_label.config(text=f"{current_time}\n{current_date}")
+            # self.rootW95dist.after(1000, update_clock)  # Update every second
         def update_clock():
-            current_time = time.strftime("%H:%M")
-            current_date = time.strftime("%d/%m/%Y")
-            self.clock_label.config(text=f"{current_time}\n{current_date}")
-            self.rootW95dist.after(1000, update_clock)  # Update every second
+            current = datetime.now()
+            formatted_text = current.strftime("%H:%M %d.%m.%y")  # ex: "15:30 29.07.25"
+            self.clock_label.config(text=formatted_text)
+            self.rootW95dist.after(1000, update_clock)
         
         update_clock()
     
@@ -4463,9 +5137,41 @@ class Windows95Desktop:
         )
         shutdown_btn.pack(fill="x", padx=2, pady=1)
         
+        sysinfo_btn = tk.Button(
+            self.start_menu,
+            text="System Requirements",
+            font=("MS Sans Serif", 8),
+            bg="#c0c0c0",
+            fg="black",
+            relief="flat",
+            bd=0,
+            anchor="w",
+            command=self.create_about_window
+        )
+        sysinfo_btn.pack(fill="x", padx=2, pady=1)
+        
+        activation_btn = tk.Button(
+            self.start_menu,
+            text="Activation Wizard",
+            font=("MS Sans Serif", 8),
+            bg="#c0c0c0",
+            fg="black",
+            relief="flat",
+            bd=0,
+            anchor="w",
+            command=self.create_activation_window
+        )
+        activation_btn.pack(fill="x", padx=2, pady=1)
+        
         # Hover effects
         shutdown_btn.bind("<Enter>", lambda e: shutdown_btn.config(bg="#0000ff", fg="white"))
         shutdown_btn.bind("<Leave>", lambda e: shutdown_btn.config(bg="#c0c0c0", fg="black"))
+        
+        sysinfo_btn.bind("<Enter>", lambda e: sysinfo_btn.config(bg="#0000ff", fg="white"))
+        sysinfo_btn.bind("<Leave>", lambda e: sysinfo_btn.config(bg="#c0c0c0", fg="black"))
+        
+        activation_btn.bind("<Enter>", lambda e: activation_btn.config(bg="#0000ff", fg="white"))
+        activation_btn.bind("<Leave>", lambda e: activation_btn.config(bg="#c0c0c0", fg="black"))
     
     def toggle_start_menu(self):
         if self.start_menu_visible:
