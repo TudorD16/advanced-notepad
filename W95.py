@@ -1,5 +1,5 @@
 import tkinter as tk
-from tkinter import ttk, messagebox, filedialog, colorchooser
+from tkinter import ttk, messagebox, filedialog, colorchooser, simpledialog
 import time
 import psutil
 import shutil
@@ -74,6 +74,8 @@ class Windows95Desktop:
         self.create_desktop_icon("Word Lite", left_x, 50 + icon_spacing * 7, "word")
         self.create_desktop_icon("Command Prompt", left_x, 50 + icon_spacing * 8, "terminal")
         self.create_desktop_icon("SQL Explorer", left_x, 50 + icon_spacing * 9, "database")
+        self.create_desktop_icon("File Fisher", left_x, 50 + icon_spacing * 10, "recovery")
+        self.create_desktop_icon("Recover Tunnel", left_x+100, 50 + icon_spacing * 10, "recover")
 
         # Icoane pe desktop (partea dreaptă)
         self.create_desktop_icon("Activate Product", right_x, 50, "activation")
@@ -135,6 +137,10 @@ class Windows95Desktop:
             fill_color = "#3366cc"  # Albastru pentru database
         elif icon_type == "sysinfo":
             fill_color = "#5c5c5c"  # Gri închis pentru system info
+        elif icon_type == "recovery":
+            fill_color = "#ff9900"
+        elif icon_type == "recover":
+            fill_color = "#6600cc" 
         else:
             fill_color = "#c0c0c0"  # Gri standard
             
@@ -195,6 +201,24 @@ class Windows95Desktop:
             icon_canvas.create_rectangle(8, 8, 24, 24, fill="#5c5c5c", outline="#000000")
             # Desenează un simbol "i" pentru informații
             icon_canvas.create_text(16, 16, text="i", fill="white", font=("Arial", 12, "bold"))
+        elif icon_type == "recovery":
+            # Desenează un simbol pentru recuperare fișiere
+            icon_canvas.create_rectangle(8, 8, 24, 24, fill="#ff9900", outline="#000000")
+            # Desenează un simbol stilizat de disc și undă
+            icon_canvas.create_oval(10, 10, 22, 22, fill="#ffffff", outline="#000000")
+            icon_canvas.create_arc(12, 12, 20, 20, start=0, extent=270, fill="#ff9900", outline="#000000")
+            # Desenează un simbol de undiță/pescuit
+            icon_canvas.create_line(10, 6, 22, 6, fill="#000000", width=2)
+            icon_canvas.create_line(16, 6, 16, 10, fill="#000000", width=1)
+        elif icon_type == "recover":
+            # Desenează un simbol pentru recuperare avansată
+            icon_canvas.create_rectangle(8, 8, 24, 24, fill="#6600cc", outline="#000000")
+            # Desenează un simbol de hard disk și restaurare
+            icon_canvas.create_rectangle(10, 10, 22, 18, fill="#c0c0c0", outline="#000000")
+            icon_canvas.create_oval(12, 12, 20, 16, fill="#ffffff", outline="#000000")
+            # Adaugă o săgeată de restaurare
+            icon_canvas.create_line(12, 20, 16, 24, fill="#00ff00", width=2)
+            icon_canvas.create_line(16, 24, 20, 20, fill="#00ff00", width=2)
         
         # Label pentru numele iconitei
         label = tk.Label(icon_frame, text=name, bg="#008080", fg="white", 
@@ -242,8 +266,1485 @@ class Windows95Desktop:
         elif icon_type == "sysinfo":
             if not any(title == "System Requirements" for title, _, _ in self.open_windows):
                 self.create_about_window()
+        elif icon_type == "recovery":
+            if not any(title == "File Fisher" for title, _, _ in self.open_windows):
+                self.create_file_recovery()
+        elif icon_type == "recover":
+            if not any(title == "Recover Tunnel" for title, _, _ in self.open_windows):
+                self.create_retro_recover()
         else:
             self.open_window(name)
+    
+    def create_retro_recover(self):
+        """Creează aplicația RetroRecover pentru recuperarea avansată a fișierelor"""
+        # Creare fereastră principală
+        recover_window = tk.Toplevel(self.rootW95dist)
+        recover_window.title("Recover Tunnel")
+        recover_window.overrideredirect(True)
+        recover_window.geometry("900x700+200+100")
+        recover_window.configure(bg="#c0c0c0")
+        
+        # Add Windows 95 style title bar
+        title_bar = tk.Frame(recover_window, bg="#000080", height=25)
+        title_bar.pack(fill="x", side="top")
+        title_label = tk.Label(title_bar, text="Recover Tunnel", fg="white", bg="#000080",
+                              font=("MS Sans Serif", 8, "bold"))
+        title_label.pack(side="left", padx=5, pady=2)
+        
+        # Close button for title bar
+        close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                                font=("Arial", 8, "bold"), width=2, height=1,
+                                relief="raised", bd=1,
+                                command=lambda: self.close_window("Recover Tunnel", recover_window))
+        close_button.pack(side="right", padx=2, pady=1)
+        
+        self.make_window_draggable(recover_window, title_bar)
+        
+        # Creare clase interne pentru a implementa funcționalitatea RetroRecover
+        class RealFileRecoveryEngine:
+            """Engine real pentru recuperarea fișierelor"""
+            
+            def __init__(self):
+                self.stopped = False
+                self.file_extensions = {
+                    'Documents': ['.txt', '.doc', '.docx', '.pdf', '.rtf', '.odt'],
+                    'Images': ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.ico'],
+                    'Videos': ['.mp4', '.avi', '.mkv', '.mov', '.wmv', '.flv', '.webm'],
+                    'Audio': ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.wma'],
+                    'Archives': ['.zip', '.rar', '.7z', '.tar', '.gz', '.bz2']
+                }
+                
+            def scan_recycle_bin(self, callback):
+                """Scanează Coșul de Reciclare pentru fișiere șterse"""
+                self.stopped = False
+                found_files = []
+                
+                try:
+                    # Obține toate unitățile de disc
+                    drives = [f"{chr(i)}:\\" for i in range(65, 91) if os.path.exists(f"{chr(i)}:\\")]
+                    
+                    total_drives = len(drives)
+                    
+                    for i, drive in enumerate(drives):
+                        if self.stopped:
+                            break
+                            
+                        progress = int((i / total_drives) * 100)
+                        callback(progress, f"Scanning drive {drive}...")
+                        
+                        # Verifică folderele Recycle Bin
+                        recycle_paths = [
+                            os.path.join(drive, '$Recycle.Bin'),
+                            os.path.join(drive, 'RECYCLER'),
+                            os.path.join(drive, 'Recycled')
+                        ]
+                        
+                        for recycle_path in recycle_paths:
+                            if self.stopped:
+                                break
+                                
+                            if os.path.exists(recycle_path):
+                                self._scan_directory_recursive(recycle_path, callback, found_files, "Recycle Bin")
+                                
+                except Exception as e:
+                    print(f"Error scanning recycle bin: {e}")
+                    
+                callback(100, "Recycle bin scan completed")
+                
+            def scan_temp_files(self, callback):
+                """Scanează locațiile de fișiere temporare"""
+                self.stopped = False
+                found_files = []
+                
+                try:
+                    temp_paths = [
+                        tempfile.gettempdir(),
+                        os.environ.get('TEMP', ''),
+                        os.environ.get('TMP', ''),
+                        os.path.join(os.environ.get('USERPROFILE', ''), 'AppData', 'Local', 'Temp'),
+                        r'C:\Windows\Temp'
+                    ]
+                    
+                    # Elimină duplicatele și căile goale
+                    temp_paths = list(set([path for path in temp_paths if path and os.path.exists(path)]))
+                    total_paths = len(temp_paths)
+                    
+                    for i, temp_path in enumerate(temp_paths):
+                        if self.stopped:
+                            break
+                            
+                        progress = int((i / total_paths) * 100)
+                        callback(progress, f"Scanning {temp_path}...")
+                        
+                        self._scan_directory_recursive(temp_path, callback, found_files, "Temp Files")
+                        
+                except Exception as e:
+                    print(f"Error scanning temp files: {e}")
+                    
+                callback(100, "Temp files scan completed")
+                
+            def scan_recent_files(self, callback):
+                """Scanează fișierele recente din diverse surse"""
+                self.stopped = False
+                found_files = []
+                
+                try:
+                    user_profile = os.environ.get('USERPROFILE', '')
+                    
+                    # Căile documentelor recente
+                    recent_paths = [
+                        os.path.join(user_profile, 'Recent'),
+                        os.path.join(user_profile, 'AppData', 'Roaming', 'Microsoft', 'Windows', 'Recent'),
+                        os.path.join(user_profile, 'AppData', 'Roaming', 'Microsoft', 'Office', 'Recent'),
+                    ]
+                    
+                    total_paths = len(recent_paths) + 1  # +1 pentru scanarea registrului
+                    current_path = 0
+                    
+                    for recent_path in recent_paths:
+                        if self.stopped:
+                            break
+                            
+                        progress = int((current_path / total_paths) * 100)
+                        callback(progress, f"Scanning recent files...")
+                        
+                        if os.path.exists(recent_path):
+                            self._scan_directory_recursive(recent_path, callback, found_files, "Recent Files")
+                            
+                        current_path += 1
+                        
+                    # Scanează registrul pentru fișiere recente
+                    if not self.stopped and hasattr(winreg, 'OpenKey'):
+                        progress = int((current_path / total_paths) * 100)
+                        try:
+                            self._scan_registry_recent_files(callback, found_files)
+                        except:
+                            pass
+                        
+                except Exception as e:
+                    print(f"Error scanning recent files: {e}")
+                    
+                callback(100, "Recent files scan completed")
+            
+            def scan_browser_cache(self, callback):
+                """Scanează directoarele cache ale browserelor"""
+                self.stopped = False
+                found_files = []
+                
+                try:
+                    user_profile = os.environ.get('USERPROFILE', '')
+                    cache_paths = [
+                        # Chrome
+                        os.path.join(user_profile, 'AppData', 'Local', 'Google', 'Chrome', 'User Data', 'Default', 'Cache'),
+                        # Firefox
+                        os.path.join(user_profile, 'AppData', 'Local', 'Mozilla', 'Firefox', 'Profiles'),
+                        # Edge
+                        os.path.join(user_profile, 'AppData', 'Local', 'Microsoft', 'Edge', 'User Data', 'Default', 'Cache'),
+                        # Internet Explorer
+                        os.path.join(user_profile, 'AppData', 'Local', 'Microsoft', 'Windows', 'INetCache'),
+                    ]
+                    
+                    total_paths = len(cache_paths)
+                    
+                    for i, cache_path in enumerate(cache_paths):
+                        if self.stopped:
+                            break
+                            
+                        progress = int((i / total_paths) * 100)
+                        callback(progress, f"Scanning browser cache...")
+                        
+                        if os.path.exists(cache_path):
+                            self._scan_directory_recursive(cache_path, callback, found_files, "Browser Cache")
+                            
+                except Exception as e:
+                    print(f"Error scanning browser cache: {e}")
+                    
+                callback(100, "Browser cache scan completed")
+                
+            def _scan_directory_recursive(self, directory, callback, found_files, source):
+                """Scanează recursiv directorul pentru fișiere recuperabile"""
+                try:
+                    total_files = 0
+                    processed_files = 0
+                    
+                    # Prima trecere: numără fișierele pentru calculul progresului
+                    try:
+                        for root, dirs, files in os.walk(directory):
+                            total_files += len(files)
+                            # Limitează adâncimea pentru a evita numărarea prea multor fișiere
+                            if len(root.split(os.sep)) - len(directory.split(os.sep)) > 3:
+                                dirs.clear()
+                    except:
+                        total_files = 100  # Estimare de rezervă
+                    
+                    # A doua trecere: procesează fișierele
+                    for root, dirs, files in os.walk(directory):
+                        if self.stopped:
+                            break
+                            
+                        for file_name in files:
+                            if self.stopped:
+                                break
+                                
+                            processed_files += 1
+                            progress = min(99, int((processed_files / max(total_files, 1)) * 100))
+                            callback(progress, f"Scanning: {file_name[:30]}...")
+                            
+                            file_path = os.path.join(root, file_name)
+                            
+                            try:
+                                if os.path.exists(file_path) and os.path.isfile(file_path):
+                                    file_info = self._get_file_info(file_path, source)
+                                    if file_info:
+                                        found_files.append(file_info)
+                                        callback(progress, f"Found: {file_name}", file_info)
+                                        
+                            except (OSError, PermissionError):
+                                continue
+                                
+                        # Limitează adâncimea pentru a evita buclele infinite
+                        if len(root.split(os.sep)) - len(directory.split(os.sep)) > 3:
+                            dirs.clear()
+                            
+                except (OSError, PermissionError):
+                    pass
+                    
+            def _get_file_info(self, file_path, source):
+                """Obține informații detaliate despre un fișier"""
+                try:
+                    stat_info = os.stat(file_path)
+                    file_size = stat_info.st_size
+                    
+                    # Ignoră fișierele foarte mici (probabil nu sunt date utilizator)
+                    if file_size < 100:
+                        return None
+                        
+                    # Ignoră fișierele sistem
+                    file_name = os.path.basename(file_path)
+                    if file_name.startswith('.') or file_name.startswith('~'):
+                        return None
+                        
+                    file_ext = os.path.splitext(file_name)[1].lower()
+                    file_type = self._get_file_type(file_ext)
+                    
+                    # Formatează dimensiunea fișierului
+                    size_str = self._format_file_size(file_size)
+                    
+                    # Formatează data
+                    mod_time = datetime.fromtimestamp(stat_info.st_mtime)
+                    date_str = mod_time.strftime("%Y-%m-%d %H:%M")
+                    
+                    # Determină starea de recuperabilitate
+                    status = "Recoverable"
+                    if not os.access(file_path, os.R_OK):
+                        status = "Access Denied"
+                    elif file_size == 0:
+                        status = "Empty File"
+                        
+                    return {
+                        'name': file_name,
+                        'size': size_str,
+                        'type': file_type,
+                        'location': source,
+                        'date': date_str,
+                        'status': status,
+                        'full_path': file_path,
+                        'file_size': file_size
+                    }
+                    
+                except (OSError, PermissionError):
+                    return None
+                    
+            def _get_file_type(self, extension):
+                """Determină tipul de fișier din extensie"""
+                for file_type, extensions in self.file_extensions.items():
+                    if extension in extensions:
+                        return file_type
+                return "Other"
+                
+            def _format_file_size(self, size_bytes):
+                """Formatează dimensiunea fișierului în format uman"""
+                if size_bytes == 0:
+                    return "0 B"
+                size_names = ["B", "KB", "MB", "GB"]
+                i = 0
+                while size_bytes >= 1024 and i < len(size_names) - 1:
+                    size_bytes /= 1024.0
+                    i += 1
+                return f"{size_bytes:.1f} {size_names[i]}"
+                
+            def _scan_registry_recent_files(self, callback, found_files):
+                """Scanează registrul Windows pentru intrări de fișiere recente"""
+                try:
+                    if not hasattr(winreg, 'OpenKey'):
+                        return
+                        
+                    # Cheia registrului pentru documente recente
+                    reg_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, 
+                                           r"Software\Microsoft\Windows\CurrentVersion\Explorer\RecentDocs")
+                    
+                    callback(50, "Scanning registry recent files...")
+                    
+                    i = 0
+                    while True:
+                        try:
+                            value_name, value_data, value_type = winreg.EnumValue(reg_key, i)
+                            
+                            # Încearcă să extragă calea fișierului din datele registrului
+                            if isinstance(value_data, bytes) and len(value_data) > 0:
+                                # Decodează ca UTF-16 și curăță
+                                try:
+                                    path_str = value_data.decode('utf-16le', errors='ignore').strip('\x00')
+                                    if path_str and os.path.exists(path_str):
+                                        file_info = self._get_file_info(path_str, "Registry Recent")
+                                        if file_info:
+                                            found_files.append(file_info)
+                                            callback(50, f"Found registry entry: {os.path.basename(path_str)}", file_info)
+                                except:
+                                    pass
+                                    
+                            i += 1
+                        except Exception:
+                            break
+                            
+                    winreg.CloseKey(reg_key)
+                    
+                except Exception as e:
+                    print(f"Error scanning registry: {e}")
+        
+        # Inițializăm variabilele
+        default_font = ("MS Sans Serif", 8)
+        bold_font = ("MS Sans Serif", 8, "bold")
+        title_font = ("MS Sans Serif", 10, "bold")
+        
+        scan_progress = tk.DoubleVar()
+        status_text = tk.StringVar(value="Ready")
+        current_operation = tk.StringVar(value="")
+        files_found = tk.IntVar(value=0)
+        recoverable_files = []
+        is_scanning = False
+        
+        # Engine pentru recuperare
+        recovery_engine = RealFileRecoveryEngine()
+        
+        # Creare meniu
+        menubar = tk.Menu(recover_window, bg='#c0c0c0', relief='raised', bd=1)
+        recover_window.config(menu=menubar)
+        
+        # Meniul File
+        file_menu = tk.Menu(menubar, tearoff=0, bg='#c0c0c0')
+        menubar.add_cascade(label="File", menu=file_menu, underline=0)
+        
+        # Meniul Tools
+        tools_menu = tk.Menu(menubar, tearoff=0, bg='#c0c0c0')
+        menubar.add_cascade(label="Tools", menu=tools_menu, underline=0)
+        
+        # Meniul Help
+        help_menu = tk.Menu(menubar, tearoff=0, bg='#c0c0c0')
+        menubar.add_cascade(label="Help", menu=help_menu, underline=0)
+        
+        # Creare toolbar
+        toolbar = tk.Frame(recover_window, bg='#c0c0c0', relief='raised', bd=1, height=40)
+        toolbar.pack(fill='x', pady=2)
+        
+        # Butoane toolbar cu efect 3D
+        btn_new = tk.Button(toolbar, text="New Scan", font=default_font,
+                           relief='raised', bd=2, padx=10, pady=2,
+                           bg='#c0c0c0')
+        btn_new.pack(side='left', padx=2, pady=2)
+        
+        btn_recycle = tk.Button(toolbar, text="Recycle Bin", font=default_font,
+                               relief='raised', bd=2, padx=10, pady=2,
+                               bg='#c0c0c0')
+        btn_recycle.pack(side='left', padx=2, pady=2)
+        
+        btn_temp = tk.Button(toolbar, text="Temp Files", font=default_font,
+                            relief='raised', bd=2, padx=10, pady=2,
+                            bg='#c0c0c0')
+        btn_temp.pack(side='left', padx=2, pady=2)
+        
+        btn_recover = tk.Button(toolbar, text="Recover Selected", font=default_font,
+                               relief='raised', bd=2, padx=10, pady=2,
+                               bg='#c0c0c0')
+        btn_recover.pack(side='left', padx=2, pady=2)
+        
+        btn_preview = tk.Button(toolbar, text="Preview", font=default_font,
+                               relief='raised', bd=2, padx=10, pady=2,
+                               bg='#c0c0c0')
+        btn_preview.pack(side='left', padx=2, pady=2)
+        
+        # Separator
+        separator = tk.Frame(toolbar, width=2, bg='#808080', relief='sunken', bd=1)
+        separator.pack(side='left', fill='y', padx=5, pady=2)
+        
+        btn_clear = tk.Button(toolbar, text="Clear", font=default_font,
+                             relief='raised', bd=2, padx=10, pady=2,
+                             bg='#c0c0c0')
+        btn_clear.pack(side='left', padx=2, pady=2)
+        
+        btn_stop = tk.Button(toolbar, text="Stop", font=default_font,
+                            relief='raised', bd=2, padx=10, pady=2,
+                            bg='#c0c0c0')
+        btn_stop.pack(side='left', padx=2, pady=2)
+        
+        # Container principal
+        main_frame = tk.Frame(recover_window, bg='#c0c0c0')
+        main_frame.pack(fill='both', expand=True, padx=5, pady=5)
+        
+        # Panoul din stânga - Opțiuni scanare
+        left_panel = tk.LabelFrame(main_frame, text="Recovery Options", font=bold_font,
+                                 bg='#c0c0c0', relief='groove', bd=2)
+        left_panel.pack(side='left', fill='y', padx=(0, 5))
+        
+        # Tipurile de recuperare
+        tk.Label(left_panel, text="Recovery Types:", font=bold_font, bg='#c0c0c0').pack(anchor='w', padx=5, pady=5)
+        
+        recovery_types = {
+            'Recycle Bin Files': tk.BooleanVar(value=True),
+            'Temporary Files': tk.BooleanVar(value=True),
+            'Recent Documents': tk.BooleanVar(value=True),
+            'Browser Cache': tk.BooleanVar(value=False),
+            'System Restore Points': tk.BooleanVar(value=False)
+        }
+        
+        for recovery_type, var in recovery_types.items():
+            cb = tk.Checkbutton(left_panel, text=recovery_type, variable=var,
+                              font=default_font, bg='#c0c0c0')
+            cb.pack(anchor='w', padx=10, pady=1)
+            
+        # Tipurile de fișiere
+        tk.Label(left_panel, text="File Types:", font=bold_font, bg='#c0c0c0').pack(anchor='w', padx=5, pady=(15,2))
+        
+        file_types = {
+            'Documents': tk.BooleanVar(value=True),
+            'Images': tk.BooleanVar(value=True),
+            'Videos': tk.BooleanVar(value=True),
+            'Audio': tk.BooleanVar(value=True),
+            'Archives': tk.BooleanVar(value=True),
+            'All Files': tk.BooleanVar(value=False)
+        }
+        
+        for file_type, var in file_types.items():
+            cb = tk.Checkbutton(left_panel, text=file_type, variable=var,
+                              font=default_font, bg='#c0c0c0')
+            cb.pack(anchor='w', padx=10, pady=1)
+            
+        # Acțiuni rapide
+        tk.Label(left_panel, text="Quick Actions:", font=bold_font, bg='#c0c0c0').pack(anchor='w', padx=5, pady=(15,5))
+        
+        btn_quick_recycle = tk.Button(left_panel, text="Quick Recycle Scan", 
+                                    font=default_font, relief='raised', bd=2,
+                                    bg='#c0c0c0')
+        btn_quick_recycle.pack(fill='x', padx=5, pady=2)
+        
+        btn_quick_temp = tk.Button(left_panel, text="Quick Temp Scan", 
+                                 font=default_font, relief='raised', bd=2,
+                                 bg='#c0c0c0')
+        btn_quick_temp.pack(fill='x', padx=5, pady=2)
+        
+        # Panoul din dreapta - Rezultate
+        right_panel = tk.Frame(main_frame, bg='#c0c0c0')
+        right_panel.pack(side='right', fill='both', expand=True)
+        
+        # Eticheta rezultatelor
+        results_label = tk.Label(right_panel, text="Recoverable Files", 
+                               font=bold_font, bg='#c0c0c0')
+        results_label.pack(anchor='w', pady=(0,5))
+        
+        # Treeview pentru rezultate
+        tree_frame = tk.Frame(right_panel, relief='sunken', bd=2)
+        tree_frame.pack(fill='both', expand=True)
+        
+        # Creează treeview cu stilul clasic
+        style = ttk.Style()
+        style.configure("Classic.Treeview", background="white", foreground="black")
+        style.configure("Classic.Treeview.Heading", background="#c0c0c0", foreground="black")
+        
+        tree = ttk.Treeview(tree_frame, style="Classic.Treeview")
+        tree['columns'] = ('Size', 'Type', 'Location', 'Date Modified', 'Status')
+        tree.heading('#0', text='File Name')
+        tree.heading('Size', text='Size')
+        tree.heading('Type', text='Type')
+        tree.heading('Location', text='Original Location')
+        tree.heading('Date Modified', text='Date Modified')
+        tree.heading('Status', text='Status')
+        
+        # Lățimile coloanelor
+        tree.column('#0', width=200)
+        tree.column('Size', width=80)
+        tree.column('Type', width=80)
+        tree.column('Location', width=200)
+        tree.column('Date Modified', width=120)
+        tree.column('Status', width=100)
+        
+        # Bare de derulare
+        v_scrollbar = tk.Scrollbar(tree_frame, orient='vertical', command=tree.yview)
+        h_scrollbar = tk.Scrollbar(tree_frame, orient='horizontal', command=tree.xview)
+        tree.configure(yscrollcommand=v_scrollbar.set, xscrollcommand=h_scrollbar.set)
+        
+        tree.pack(side='left', fill='both', expand=True)
+        v_scrollbar.pack(side='right', fill='y')
+        h_scrollbar.pack(side='bottom', fill='x')
+        
+        # Cadrul de progres
+        progress_frame = tk.Frame(right_panel, bg='#c0c0c0')
+        progress_frame.pack(fill='x', pady=(5,0))
+        
+        # Bara de progres
+        progress_bar = tk.Canvas(progress_frame, height=20, bg='white', relief='sunken', bd=2)
+        progress_bar.pack(fill='x', pady=2)
+        
+        # Statusul operației
+        operation_label = tk.Label(progress_frame, textvariable=current_operation,
+                                 font=default_font, bg='#c0c0c0')
+        operation_label.pack(anchor='w')
+        
+        # Bara de status
+        status_frame = tk.Frame(recover_window, bg='#c0c0c0', relief='sunken', bd=1)
+        status_frame.pack(fill='x', side='bottom')
+        
+        status_label = tk.Label(status_frame, textvariable=status_text,
+                              font=default_font, bg='#c0c0c0', anchor='w')
+        status_label.pack(side='left', padx=5)
+        
+        separator1 = tk.Frame(status_frame, width=2, bg='#808080', relief='sunken', bd=1)
+        separator1.pack(side='left', fill='y', padx=2)
+        
+        files_label = tk.Label(status_frame, text="Files found: 0",
+                             font=default_font, bg='#c0c0c0')
+        files_label.pack(side='left', padx=5)
+        
+        separator2 = tk.Frame(status_frame, width=2, bg='#808080', relief='sunken', bd=1)
+        separator2.pack(side='left', fill='y', padx=2)
+        
+        time_label = tk.Label(status_frame, text=datetime.now().strftime("%H:%M:%S"),
+                            font=default_font, bg='#c0c0c0')
+        time_label.pack(side='right', padx=5)
+        
+        # Funcția pentru actualizarea orei
+        def update_time():
+            time_label.config(text=datetime.now().strftime("%H:%M:%S"))
+            recover_window.after(1000, update_time)
+        
+        update_time()
+        
+        # Funcția pentru actualizarea progresului
+        def update_progress(value, operation=""):
+            # Actualizează bara de progres
+            progress_bar.delete("all")
+            
+            # Forțează canvas-ul să-și actualizeze dimensiunile mai întâi
+            progress_bar.update_idletasks()
+            width = progress_bar.winfo_width()
+            height = progress_bar.winfo_height()
+            
+            if width > 1 and height > 1:
+                fill_width = int((value / 100) * (width - 4))
+                if fill_width > 0:
+                    block_width = 8
+                    blocks = max(1, fill_width // block_width)
+                    for i in range(blocks):
+                        x1 = 2 + i * block_width
+                        x2 = min(x1 + block_width - 1, width - 2)
+                        if x2 > x1:
+                            progress_bar.create_rectangle(x1, 2, x2, height-2,
+                                                       fill='#0000ff', outline='#0000ff')
+            
+            if operation:
+                current_operation.set(operation)
+            
+            # Forțează actualizarea imediată a tuturor elementelor UI
+            recover_window.update()
+        
+        # Funcția pentru afișarea ferestrei de setări
+        def show_settings():
+            settings_window = tk.Toplevel(recover_window)
+            settings_window.title("Settings")
+            settings_window.overrideredirect(True)
+            settings_window.geometry("400x300")
+            settings_window.configure(bg='#c0c0c0')
+            settings_window.resizable(False, False)
+            
+            # Windows 95 style title bar
+            title_bar = tk.Frame(settings_window, bg="#000080", height=25)
+            title_bar.pack(fill="x", side="top")
+            title_label = tk.Label(title_bar, text="Settings", fg="white", bg="#000080",
+                                font=("MS Sans Serif", 8, "bold"))
+            title_label.pack(side="left", padx=5, pady=2)
+            
+            # Close button for title bar
+            close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                                  font=("Arial", 8, "bold"), width=2, height=1,
+                                  relief="raised", bd=1,
+                                  command=settings_window.destroy)
+            close_button.pack(side="right", padx=2, pady=1)
+            
+            # Make window draggable
+            self.make_window_draggable(settings_window, title_bar)
+            
+            tk.Label(settings_window, text="RetroRecover Pro Settings", 
+                   font=title_font, bg='#c0c0c0').pack(pady=10)
+            
+            # Setări recuperare
+            frame1 = tk.LabelFrame(settings_window, text="Recovery Options", 
+                                 font=bold_font, bg='#c0c0c0')
+            frame1.pack(fill='x', padx=10, pady=5)
+            
+            create_log = tk.BooleanVar(value=True)
+            verify_files = tk.BooleanVar(value=True)
+            
+            tk.Checkbutton(frame1, text="Create recovery log", variable=create_log,
+                         font=default_font, bg='#c0c0c0').pack(anchor='w', padx=5)
+            tk.Checkbutton(frame1, text="Verify recovered files", variable=verify_files,
+                         font=default_font, bg='#c0c0c0').pack(anchor='w', padx=5)
+            
+            # Setări scanare
+            frame2 = tk.LabelFrame(settings_window, text="Scan Settings", 
+                                 font=bold_font, bg='#c0c0c0')
+            frame2.pack(fill='x', padx=10, pady=5)
+            
+            tk.Label(frame2, text="Max file age (days):", font=default_font, bg='#c0c0c0').pack(anchor='w', padx=5)
+            max_age_var = tk.StringVar(value="30")
+            tk.Entry(frame2, textvariable=max_age_var, width=10).pack(anchor='w', padx=5, pady=2)
+            
+            # Butoane
+            btn_frame = tk.Frame(settings_window, bg='#c0c0c0')
+            btn_frame.pack(pady=20)
+            
+            tk.Button(btn_frame, text="OK", font=default_font, 
+                   relief='raised', bd=2, padx=20, command=settings_window.destroy).pack(side='left', padx=5)
+            tk.Button(btn_frame, text="Cancel", font=default_font, 
+                   relief='raised', bd=2, padx=20, command=settings_window.destroy).pack(side='left', padx=5)
+        
+        # Funcția pentru afișarea ferestrei about
+        def show_about():
+            about_window = tk.Toplevel(recover_window)
+            about_window.title("About RetroRecover Pro")
+            about_window.overrideredirect(True)
+            about_window.geometry("450x350")
+            about_window.configure(bg='#c0c0c0')
+            about_window.resizable(False, False)
+            
+            # Windows 95 style title bar
+            title_bar = tk.Frame(about_window, bg="#000080", height=25)
+            title_bar.pack(fill="x", side="top")
+            title_label = tk.Label(title_bar, text="About RetroRecover Pro", fg="white", bg="#000080",
+                                font=("MS Sans Serif", 8, "bold"))
+            title_label.pack(side="left", padx=5, pady=2)
+            
+            # Close button for title bar
+            close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                                  font=("Arial", 8, "bold"), width=2, height=1,
+                                  relief="raised", bd=1,
+                                  command=about_window.destroy)
+            close_button.pack(side="right", padx=2, pady=1)
+            
+            # Make window draggable
+            self.make_window_draggable(about_window, title_bar)
+            
+            tk.Label(about_window, text="RetroRecover Pro", 
+                   font=("MS Sans Serif", 14, "bold"), 
+                   bg='#c0c0c0').pack(pady=20)
+            
+            tk.Label(about_window, text="Version 1.0 - Real Recovery", 
+                   font=default_font, bg='#c0c0c0').pack()
+            
+            tk.Label(about_window, text="Advanced Real File Recovery Tool", 
+                   font=default_font, bg='#c0c0c0').pack(pady=5)
+            
+            info_text = """
+    This software helps you recover real deleted files from:
+    - Recycle Bin (including hidden files)
+    - Temporary file locations
+    - Recent document lists
+    - Browser cache files
+    - System restore points
+
+    Features:
+    - Multiple recovery sources
+    - File preview capabilities
+    - Batch recovery operations
+
+    CAUTION: This tool accesses real system files and folders.
+    Use responsibly and ensure you have proper permissions.
+
+    Copyright © 2024 Tudor Marmureanu
+            """
+            
+            text_widget = tk.Text(about_window, bg='white', font=default_font, 
+                                wrap='word', height=12, width=50)
+            text_widget.pack(padx=20, pady=10)
+            text_widget.insert('1.0', info_text)
+            text_widget.config(state='disabled')
+            
+            tk.Button(about_window, text="OK", font=default_font, 
+                   relief='raised', bd=2, padx=20, 
+                   command=about_window.destroy).pack(pady=10)
+        
+        # Funcția pentru a curăța rezultatele
+        def clear_results():
+            """Curăță toate rezultatele curente"""
+            for item in tree.get_children():
+                tree.delete(item)
+                
+            recoverable_files.clear()
+            files_found.set(0)
+            files_label.config(text="Files found: 0")
+            status_text.set("Results cleared")
+            current_operation.set("")
+            update_progress(0, "Ready")
+        
+        # Funcția pentru scanarea callback
+        def scan_callback(progress, operation, found_file=None):
+            update_progress(progress, operation)
+            
+            if found_file:
+                # Adaugă fișierul găsit în tree
+                tree.insert('', 'end', text=found_file['name'],
+                           values=(found_file['size'], found_file['type'],
+                                 found_file['location'], found_file['date'], found_file['status']))
+                recoverable_files.append(found_file)
+                files_found.set(len(recoverable_files))
+                files_label.config(text=f"Files found: {files_found.get()}")
+        
+        # Funcția pentru scanarea Recycle Bin
+        def scan_recycle_bin():
+            nonlocal is_scanning
+            if is_scanning:
+                return
+                
+            recovery_engine.stopped = False  # Reset stop flag
+            is_scanning = True
+            status_text.set("Scanning Recycle Bin...")
+            
+            scan_thread = threading.Thread(target=_scan_recycle_bin_thread)
+            scan_thread.daemon = True
+            scan_thread.start()
+            
+        def _scan_recycle_bin_thread():
+            nonlocal is_scanning
+            try:
+                recovery_engine.scan_recycle_bin(scan_callback)
+            finally:
+                is_scanning = False
+                status_text.set("Recycle Bin scan completed")
+        
+        # Funcția pentru scanarea fișierelor temporare
+        def scan_temp_files():
+            nonlocal is_scanning
+            if is_scanning:
+                return
+                
+            recovery_engine.stopped = False  # Reset stop flag
+            is_scanning = True
+            status_text.set("Scanning temporary files...")
+            
+            scan_thread = threading.Thread(target=_scan_temp_files_thread)
+            scan_thread.daemon = True
+            scan_thread.start()
+            
+        def _scan_temp_files_thread():
+            nonlocal is_scanning
+            try:
+                recovery_engine.scan_temp_files(scan_callback)
+            finally:
+                is_scanning = False
+                status_text.set("Temporary files scan completed")
+        
+        # Funcția pentru scanarea fișierelor recente
+        def scan_recent_files():
+            nonlocal is_scanning
+            if is_scanning:
+                return
+                
+            recovery_engine.stopped = False  # Reset stop flag
+            is_scanning = True
+            status_text.set("Scanning recent files...")
+            
+            scan_thread = threading.Thread(target=_scan_recent_files_thread)
+            scan_thread.daemon = True
+            scan_thread.start()
+            
+        def _scan_recent_files_thread():
+            nonlocal is_scanning
+            try:
+                recovery_engine.scan_recent_files(scan_callback)
+            finally:
+                is_scanning = False
+                status_text.set("Recent files scan completed")
+        
+        # Funcția pentru scanare completă
+        def new_scan():
+            nonlocal is_scanning
+            if is_scanning:
+                messagebox.showwarning("Scan in Progress", "Please stop the current scan before starting a new one.")
+                return
+                
+            # Reset stop flag
+            recovery_engine.stopped = False
+            
+            # Curăță rezultatele anterioare
+            for item in tree.get_children():
+                tree.delete(item)
+                
+            recoverable_files.clear()
+            files_found.set(0)
+            
+            # Începe scanarea cuprinzătoare
+            is_scanning = True
+            status_text.set("Starting comprehensive scan...")
+            
+            scan_thread = threading.Thread(target=perform_comprehensive_scan)
+            scan_thread.daemon = True
+            scan_thread.start()
+            
+        def perform_comprehensive_scan():
+            nonlocal is_scanning
+            try:
+                selected_types = [rtype for rtype, var in recovery_types.items() if var.get()]
+                total_operations = len(selected_types)
+                current_op_index = 0  # Redenumit din 'current_operation' în 'current_op_index'
+                
+                if 'Recycle Bin Files' in selected_types and not recovery_engine.stopped:
+                    current_op_index += 1  # Folosește noua denumire
+                    base_progress = int(((current_op_index - 1) / total_operations) * 100)
+                    recovery_engine.scan_recycle_bin(lambda p, op, f=None: scan_callback(
+                        base_progress + (p // total_operations), op, f))
+                    
+                if 'Temporary Files' in selected_types and not recovery_engine.stopped:
+                    current_op_index += 1  # Folosește noua denumire
+                    base_progress = int(((current_op_index - 1) / total_operations) * 100)
+                    recovery_engine.scan_temp_files(lambda p, op, f=None: scan_callback(
+                        base_progress + (p // total_operations), op, f))
+                    
+                if 'Recent Documents' in selected_types and not recovery_engine.stopped:
+                    current_op_index += 1  # Folosește noua denumire
+                    base_progress = int(((current_op_index - 1) / total_operations) * 100)
+                    recovery_engine.scan_recent_files(lambda p, op, f=None: scan_callback(
+                        base_progress + (p // total_operations), op, f))
+                    
+                if 'Browser Cache' in selected_types and not recovery_engine.stopped:
+                    current_op_index += 1  # Folosește noua denumire
+                    base_progress = int(((current_op_index - 1) / total_operations) * 100)
+                    recovery_engine.scan_browser_cache(lambda p, op, f=None: scan_callback(
+                        base_progress + (p // total_operations), op, f))
+                    
+            except Exception as e:
+                messagebox.showerror("Scan Error", f"An error occurred during scanning: {str(e)}")
+            finally:
+                is_scanning = False
+                recovery_engine.stopped = False  # Reset pentru următoarea scanare
+                if recovery_engine.stopped:
+                    status_text.set("Scan stopped by user")
+                    current_operation.set("Scan cancelled")  # Aici folosim variabila globală
+                else:
+                    status_text.set("Scan completed")
+                    current_operation.set("Scan finished successfully")  # Aici folosim variabila globală
+                update_progress(100, "")
+        
+        # Funcția pentru oprirea scanării
+        def stop_scan():
+            nonlocal is_scanning
+            is_scanning = False
+            recovery_engine.stopped = True
+            status_text.set("Stopping scan...")
+            current_operation.set("Scan stopped by user")
+            update_progress(0, "Scan stopped")
+        
+        # Funcția pentru previzualizarea fișierului
+        def preview_file():
+            selected_item = tree.selection()
+            if not selected_item:
+                messagebox.showwarning("No Selection", "Please select a file to preview.")
+                return
+                
+            file_name = tree.item(selected_item[0])['text']
+            
+            # Găsește informațiile despre fișier
+            file_info = None
+            for f in recoverable_files:
+                if f['name'] == file_name:
+                    file_info = f
+                    break
+                    
+            if file_info and 'full_path' in file_info:
+                show_preview_window(file_name, file_info['full_path'])
+            else:
+                messagebox.showwarning("Preview Error", "Cannot preview this file.")
+        
+        def show_preview_window(file_name, file_path):
+            preview_window = tk.Toplevel(recover_window)
+            preview_window.title(f"Preview: {file_name}")
+            preview_window.overrideredirect(True)
+            preview_window.geometry("500x400")
+            preview_window.configure(bg='#c0c0c0')
+            
+            # Windows 95 style title bar
+            title_bar = tk.Frame(preview_window, bg="#000080", height=25)
+            title_bar.pack(fill="x", side="top")
+            title_label = tk.Label(title_bar, text=f"Preview: {file_name}", fg="white", bg="#000080",
+                                font=("MS Sans Serif", 8, "bold"))
+            title_label.pack(side="left", padx=5, pady=2)
+            
+            # Close button for title bar
+            close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                                  font=("Arial", 8, "bold"), width=2, height=1,
+                                  relief="raised", bd=1,
+                                  command=preview_window.destroy)
+            close_button.pack(side="right", padx=2, pady=1)
+            
+            # Make window draggable
+            self.make_window_draggable(preview_window, title_bar)
+            
+            # Conținutul previzualizării
+            text_area = tk.Text(preview_window, bg='white', font=default_font, wrap='word')
+            scrollbar = tk.Scrollbar(preview_window, orient='vertical', command=text_area.yview)
+            text_area.configure(yscrollcommand=scrollbar.set)
+            
+            text_area.pack(side='left', fill='both', expand=True, padx=10, pady=10)
+            scrollbar.pack(side='right', fill='y', pady=10)
+            
+            try:
+                if os.path.exists(file_path):
+                    file_size = os.path.getsize(file_path)
+                    if file_size < 1024 * 1024:  # Mai puțin de 1MB
+                        try:
+                            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                                content = f.read()
+                                text_area.insert('1.0', content)
+                        except:
+                            text_area.insert('1.0', f"File: {file_name}\nPath: {file_path}\n\n")
+                            text_area.insert('end', "Binary file or unsupported format.\nUse external application to view.")
+                    else:
+                        text_area.insert('1.0', f"File: {file_name}\nPath: {file_path}\nSize: {file_size} bytes\n\n")
+                        text_area.insert('end', "File too large to preview.")
+                else:
+                    text_area.insert('1.0', f"File: {file_name}\nPath: {file_path}\n\n")
+                    text_area.insert('end', "File no longer exists at this location.")
+            except Exception as e:
+                text_area.insert('1.0', f"Error previewing file: {str(e)}")
+                
+            text_area.config(state='disabled')
+        
+        # Funcția pentru recuperarea fișierelor selectate
+        def recover_selected():
+            selected_items = tree.selection()
+            if not selected_items:
+                messagebox.showwarning("No Selection", "Please select files to recover.")
+                return
+                
+            # Cere folderul de destinație
+            dest_folder = filedialog.askdirectory(title="Select Recovery Destination")
+            if not dest_folder:
+                return
+                
+            # Începe recuperarea
+            recovery_thread = threading.Thread(target=perform_recovery,
+                                             args=(selected_items, dest_folder))
+            recovery_thread.daemon = True
+            recovery_thread.start()
+            
+        def perform_recovery(selected_items, dest_folder):
+            try:
+                total_files = len(selected_items)
+                recovered = 0
+                failed = 0
+                
+                for i, item in enumerate(selected_items):
+                    file_name = tree.item(item)['text']
+                    progress = int((i / total_files) * 100)
+                    update_progress(progress, f"Recovering {file_name}...")
+                    
+                    # Găsește informațiile despre fișier
+                    file_info = None
+                    for f in recoverable_files:
+                        if f['name'] == file_name:
+                            file_info = f
+                            break
+                            
+                    if file_info and 'full_path' in file_info:
+                        try:
+                            # Efectuează recuperarea propriu-zisă
+                            dest_path = os.path.join(dest_folder, file_name)
+                            if os.path.exists(file_info['full_path']):
+                                shutil.copy2(file_info['full_path'], dest_path)
+                                recovered += 1
+                            else:
+                                failed += 1
+                        except Exception as e:
+                            print(f"Failed to recover {file_name}: {e}")
+                            failed += 1
+                    else:
+                        failed += 1
+                    
+                update_progress(100, "Recovery completed")
+                
+                if recovered > 0:
+                    messagebox.showinfo("Recovery Complete", 
+                                      f"Successfully recovered {recovered} files to {dest_folder}\n"
+                                      f"Failed to recover: {failed} files")
+                else:
+                    messagebox.showwarning("Recovery Failed", 
+                                         "No files could be recovered. They may have been permanently deleted.")
+                
+            except Exception as e:
+                messagebox.showerror("Recovery Error", f"An error occurred during recovery: {str(e)}")
+        
+        # Inițializare sample date pentru demo
+        def populate_demo_data():
+            """Populează cu date demo"""
+            sample_files = [
+                {"name": "important_document.docx", "size": "45.2 KB", "type": "Documents", 
+                 "location": "Recycle Bin", "date": "2024-07-15 14:30", "status": "Recoverable"},
+                {"name": "vacation_photo.jpg", "size": "2.3 MB", "type": "Images", 
+                 "location": "Temp Files", "date": "2024-07-10 09:15", "status": "Recoverable"},
+                {"name": "project_backup.zip", "size": "15.6 MB", "type": "Archives", 
+                 "location": "Recent Files", "date": "2024-07-20 16:45", "status": "Recoverable"},
+                {"name": "presentation.pptx", "size": "8.7 MB", "type": "Documents", 
+                 "location": "Recycle Bin", "date": "2024-07-18 11:22", "status": "Recoverable"},
+                {"name": "meeting_notes.txt", "size": "12.4 KB", "type": "Documents", 
+                 "location": "Temp Files", "date": "2024-07-25 13:10", "status": "Recoverable"}
+            ]
+            
+            for file in sample_files:
+                tree.insert('', 'end', text=file["name"], values=(
+                    file["size"], file["type"], file["location"], file["date"], file["status"]))
+                recoverable_files.append(file)
+            
+            files_found.set(len(sample_files))
+            files_label.config(text=f"Files found: {files_found.get()}")
+            status_text.set("Sample data loaded")
+        
+        # Conectarea funcțiilor la butoane
+        file_menu.add_command(label="New Scan", command=new_scan, underline=0)
+        file_menu.add_command(label="Open Recovery Log", command=lambda: messagebox.showinfo("Info", "Log functionality is a demo"), underline=0)
+        file_menu.add_separator()
+        file_menu.add_command(label="Exit", command=lambda: self.close_window("Recover Tunnel", recover_window), underline=1)
+        
+        tools_menu.add_command(label="Scan Recycle Bin", command=scan_recycle_bin, underline=5)
+        tools_menu.add_command(label="Scan Temp Files", command=scan_temp_files, underline=5)
+        tools_menu.add_command(label="Recent Files Scan", command=scan_recent_files, underline=0)
+        tools_menu.add_separator()
+        tools_menu.add_command(label="Settings", command=show_settings, underline=0)
+        
+        help_menu.add_command(label="About", command=show_about, underline=0)
+        
+        btn_new.config(command=new_scan)
+        btn_recycle.config(command=scan_recycle_bin)
+        btn_temp.config(command=scan_temp_files)
+        btn_recover.config(command=recover_selected)
+        btn_preview.config(command=preview_file)
+        btn_clear.config(command=clear_results)
+        btn_stop.config(command=stop_scan)
+        
+        btn_quick_recycle.config(command=scan_recycle_bin)
+        btn_quick_temp.config(command=scan_temp_files)
+        
+        # Populează cu date demo
+        populate_demo_data()
+        
+        # Adaugă în taskbar
+        self.add_window_to_taskbar("Recover Tunnel", recover_window)
+        recover_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("Recover Tunnel", recover_window))
+    
+    def create_file_recovery(self):
+        """Creează aplicația File Fisher pentru recuperarea fișierelor"""
+        recovery_window = tk.Toplevel(self.rootW95dist)
+        recovery_window.title("File Fisher")
+        recovery_window.overrideredirect(True)
+        recovery_window.geometry("640x480+300+150")
+        recovery_window.configure(bg="#c0c0c0")
+        
+        # Add Windows 95 style title bar
+        title_bar = tk.Frame(recovery_window, bg="#000080", height=25)
+        title_bar.pack(fill="x", side="top")
+        title_label = tk.Label(title_bar, text="File Fisher", fg="white", bg="#000080",
+                              font=("MS Sans Serif", 8, "bold"))
+        title_label.pack(side="left", padx=5, pady=2)
+        
+        # Close button for title bar
+        close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                                font=("Arial", 8, "bold"), width=2, height=1,
+                                relief="raised", bd=1,
+                                command=lambda: self.close_window("File Fisher", recovery_window))
+        close_button.pack(side="right", padx=2, pady=1)
+        
+        self.make_window_draggable(recovery_window, title_bar)
+        
+        # Windows 95 style configuration
+        bg_color = '#c0c0c0'
+        button_bg = '#c0c0c0'
+        button_fg = '#000000'
+        text_bg = '#ffffff'
+        font_main = ('MS Sans Serif', 8)
+        font_title = ('MS Sans Serif', 8, 'bold')
+        
+        # Variables
+        scanning = False
+        recovered_files = []
+        scan_progress = 0
+        
+        # Main container
+        main_frame = tk.Frame(recovery_window, bg=bg_color, relief='raised', bd=2)
+        main_frame.pack(fill='both', expand=True, padx=2, pady=2)
+        
+        # Top section - Drive selection
+        drive_frame = tk.LabelFrame(main_frame, text="Select Drive to Scan", 
+                                  bg=bg_color, font=font_main, relief='groove', bd=2)
+        drive_frame.pack(fill='x', padx=10, pady=5)
+        
+        drive_var = tk.StringVar()
+        drive_combo = ttk.Combobox(drive_frame, textvariable=drive_var, 
+                                  state='readonly', width=20)
+        drive_combo.pack(side='left', padx=5, pady=5)
+        
+        # Function to refresh drives
+        def refresh_drives():
+            """Refresh available drives list"""
+            drives = []
+            # Get available drives (Windows)
+            if os.name == 'nt':
+                import string
+                for letter in string.ascii_uppercase:
+                    drive = f"{letter}:\\"
+                    if os.path.exists(drive):
+                        drives.append(drive)
+            else:
+                # Unix-like systems
+                drives = ['/']
+                
+            drive_combo['values'] = drives
+            if drives:
+                drive_combo.set(drives[0])
+        
+        refresh_btn = tk.Button(drive_frame, text="Refresh", command=refresh_drives,
+                              bg=button_bg, font=font_main, relief='raised', bd=2)
+        refresh_btn.pack(side='left', padx=5)
+        
+        # Scan options
+        options_frame = tk.LabelFrame(main_frame, text="Scan Options", 
+                                    bg=bg_color, font=font_main, relief='groove', bd=2)
+        options_frame.pack(fill='x', padx=10, pady=5)
+        
+        deep_scan_var = tk.BooleanVar()
+        deep_check = tk.Checkbutton(options_frame, text="Deep Scan (slower but more thorough)",
+                                  variable=deep_scan_var, bg=bg_color, font=font_main)
+        deep_check.pack(anchor='w', padx=5, pady=2)
+        
+        file_types_var = tk.StringVar(value="All Files")
+        file_type_frame = tk.Frame(options_frame, bg=bg_color)
+        file_type_frame.pack(fill='x', padx=5, pady=2)
+        
+        tk.Label(file_type_frame, text="File Types:", bg=bg_color, font=font_main).pack(side='left')
+        file_type_combo = ttk.Combobox(file_type_frame, textvariable=file_types_var,
+                                     values=["All Files", "Images (jpg,png,gif)", "Documents (doc,pdf,txt)", 
+                                             "Videos (mp4,avi,mov)", "Audio (mp3,wav,flac)"], width=25)
+        file_type_combo.pack(side='left', padx=5)
+        
+        # Control buttons
+        control_frame = tk.Frame(main_frame, bg=bg_color)
+        control_frame.pack(fill='x', padx=10, pady=5)
+        
+        # Progress section
+        progress_frame = tk.LabelFrame(main_frame, text="Scan Progress", 
+                                     bg=bg_color, font=font_main, relief='groove', bd=2)
+        progress_frame.pack(fill='x', padx=10, pady=5)
+        
+        progress_var = tk.StringVar(value="Ready to scan...")
+        progress_label = tk.Label(progress_frame, textvariable=progress_var,
+                                bg=bg_color, font=font_main)
+        progress_label.pack(pady=5)
+        
+        progress_bar = ttk.Progressbar(progress_frame, mode='determinate')
+        progress_bar.pack(fill='x', padx=10, pady=5)
+        
+        # Results section
+        results_frame = tk.LabelFrame(main_frame, text="Found Files", 
+                                    bg=bg_color, font=font_main, relief='groove', bd=2)
+        results_frame.pack(fill='both', expand=True, padx=10, pady=5)
+        
+        # Treeview with scrollbars
+        tree_frame = tk.Frame(results_frame, bg=bg_color)
+        tree_frame.pack(fill='both', expand=True, padx=5, pady=5)
+        
+        tree = ttk.Treeview(tree_frame, columns=('Size', 'Type', 'Status'), show='tree headings')
+        tree.heading('#0', text='File Name')
+        tree.heading('Size', text='Size')
+        tree.heading('Type', text='Type')
+        tree.heading('Status', text='Status')
+        
+        tree.column('#0', width=200)
+        tree.column('Size', width=80)
+        tree.column('Type', width=80)
+        tree.column('Status', width=100)
+        
+        # Scrollbars
+        v_scrollbar = ttk.Scrollbar(tree_frame, orient='vertical', command=tree.yview)
+        h_scrollbar = ttk.Scrollbar(tree_frame, orient='horizontal', command=tree.xview)
+        tree.configure(yscrollcommand=v_scrollbar.set, xscrollcommand=h_scrollbar.set)
+        
+        tree.pack(side='left', fill='both', expand=True)
+        v_scrollbar.pack(side='right', fill='y')
+        h_scrollbar.pack(side='bottom', fill='x')
+        
+        # Status bar
+        status_frame = tk.Frame(recovery_window, bg='#808080', relief='sunken', bd=1)
+        status_frame.pack(fill='x', side='bottom')
+        
+        status_var = tk.StringVar(value="Ready")
+        status_label = tk.Label(status_frame, textvariable=status_var,
+                              bg='#808080', fg='white', font=font_main, anchor='w')
+        status_label.pack(fill='x', padx=5, pady=1)
+        
+        # Utility functions
+        def format_size(size):
+            """Format file size in human readable format"""
+            for unit in ['B', 'KB', 'MB', 'GB']:
+                if size < 1024:
+                    return f"{size:.1f} {unit}"
+                size /= 1024
+            return f"{size:.1f} TB"
+        
+        def get_file_extensions():
+            """Get file extensions based on selected type"""
+            file_type = file_types_var.get()
+            
+            extensions = {
+                "All Files": [],
+                "Images (jpg,png,gif)": ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff'],
+                "Documents (doc,pdf,txt)": ['.doc', '.docx', '.pdf', '.txt', '.rtf', '.odt', '.ods', '.odp', '.md', '.html', '.htm', '.xls', '.xlsx', '.csv', '.rtf', '.ppt', '.pptx', '.json', '.log'],
+                "Videos (mp4,avi,mov)": ['.mp4', '.avi', '.mov', '.mkv', '.wmv', '.flv'],
+                "Audio (mp3,wav,flac)": ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.wma']
+            }
+            
+            return extensions.get(file_type, [])
+        
+        def is_file_match(file_path, file_types):
+            """Check if file matches the selected criteria"""
+            try:
+                # Check file extension if specific type is selected
+                if file_types:
+                    _, ext = os.path.splitext(file_path.lower())
+                    if ext not in file_types:
+                        return False
+                        
+                # If "All Files" or file matches extension filter, include it
+                return True
+                        
+            except Exception:
+                return False
+        
+        def add_found_file(file_path):
+            """Add a found file to the results"""
+            try:
+                file_name = os.path.basename(file_path)
+                
+                # Get file info
+                if os.path.exists(file_path):
+                    size = os.path.getsize(file_path)
+                    status = "Existing"
+                else:
+                    size = 0
+                    status = "Not Found"
+                    
+                size_str = format_size(size)
+                _, ext = os.path.splitext(file_name)
+                file_type = ext.upper()[1:] if ext else "Unknown"
+                
+                # Add to tree
+                item = tree.insert('', 'end', text=file_name, 
+                                 values=(size_str, file_type, status))
+                
+                # Store file info
+                recovered_files.append({
+                    'path': file_path,
+                    'name': file_name,
+                    'size': size,
+                    'type': file_type,
+                    'status': status,
+                    'item': item
+                })
+                
+            except Exception as e:
+                print(f"Error adding file {file_path}: {e}")
+        
+        def copy_single_file(file_info, recovery_dir):
+            """Copy a single file"""
+            try:
+                source_path = file_info['path']
+                dest_path = os.path.join(recovery_dir, file_info['name'])
+                
+                # If source exists, copy it
+                if os.path.exists(source_path):
+                    import shutil
+                    shutil.copy2(source_path, dest_path)
+                    return True
+                else:
+                    # File doesn't exist - can't copy
+                    return False
+                    
+            except Exception as e:
+                print(f"Error copying {file_info['name']}: {e}")
+                return False
+        
+        def recover_files():
+            """Recover selected files"""
+            selected_items = tree.selection()
+            if not selected_items:
+                messagebox.showwarning("Warning", "Please select files to fish!")
+                return
+                
+            # Choose recovery location
+            recovery_dir = filedialog.askdirectory(title="Select Fishing Location")
+            if not recovery_dir:
+                return
+                
+            # Start recovery
+            status_var.set("Copying files...")
+            recovered_count = 0
+            
+            for item in selected_items:
+                try:
+                    # Find file info
+                    file_info = None
+                    for f in recovered_files:
+                        if f['item'] == item:
+                            file_info = f
+                            break
+                            
+                    if file_info:
+                        success = copy_single_file(file_info, recovery_dir)
+                        if success:
+                            recovered_count += 1
+                            # Update status in tree
+                            tree.set(item, 'Status', 'Copied')
+                            
+                except Exception as e:
+                    print(f"Copy error: {e}")
+                    
+            messagebox.showinfo("Copy Complete", 
+                               f"Successfully copied {recovered_count} out of {len(selected_items)} files!")
+            status_var.set(f"Copied {recovered_count} files")
+        
+        def perform_scan():
+            """Perform the actual file scanning"""
+            nonlocal scanning
+            
+            drive = drive_var.get()
+            deep_scan = deep_scan_var.get()
+            file_types = get_file_extensions()
+            
+            progress_var.set(f"Scanning {drive}...")
+            status_var.set("Scanning...")
+            
+            total_files = 0
+            scanned_files = 0
+            
+            try:
+                # First pass - count files for progress
+                if scanning:
+                    for root, dirs, files in os.walk(drive):
+                        total_files += len(files)
+                        if not scanning:
+                            break
+                            
+                progress_bar.config(maximum=total_files)
+                
+                # Second pass - actual scanning
+                for root, dirs, files in os.walk(drive):
+                    if not scanning:
+                        break
+                        
+                    for file in files:
+                        if not scanning:
+                            break
+                            
+                        file_path = os.path.join(root, file)
+                        scanned_files += 1
+                        
+                        # Update progress
+                        progress_bar.config(value=scanned_files)
+                        progress_var.set(f"Scanning: {file} ({scanned_files}/{total_files})")
+                        recovery_window.update_idletasks()
+                        
+                        # Check if file matches criteria
+                        if is_file_match(file_path, file_types):
+                            add_found_file(file_path)
+                            
+                        # Small delay to prevent UI freezing
+                        time.sleep(0.001)
+                        
+            except Exception as e:
+                messagebox.showerror("Error", f"Scan error: {str(e)}")
+                
+            # Scan completed
+            if scanning:
+                progress_var.set(f"Scan completed! Found {len(recovered_files)} files")
+                status_var.set(f"Found {len(recovered_files)} files")
+            
+            scanning = False
+            scan_btn.config(state='normal')
+            stop_btn.config(state='disabled')
+            if recovered_files:
+                recover_btn.config(state='normal')
+        
+        def start_scan():
+            """Start the file recovery scan"""
+            nonlocal scanning
+            
+            if not drive_var.get():
+                messagebox.showwarning("Warning", "Please select a drive to scan!")
+                return
+                
+            scanning = True
+            scan_btn.config(state='disabled')
+            stop_btn.config(state='normal')
+            recover_btn.config(state='disabled')
+            
+            # Clear previous results
+            for item in tree.get_children():
+                tree.delete(item)
+            recovered_files.clear()
+            
+            # Start scan in separate thread
+            scan_thread = threading.Thread(target=perform_scan)
+            scan_thread.daemon = True
+            scan_thread.start()
+        
+        def stop_scan():
+            """Stop the current scan"""
+            nonlocal scanning
+            
+            scanning = False
+            scan_btn.config(state='normal')
+            stop_btn.config(state='disabled')
+            if recovered_files:
+                recover_btn.config(state='normal')
+            progress_var.set("Scan stopped by user")
+            status_var.set("Scan stopped")
+        
+        # Buttons
+        scan_btn = tk.Button(control_frame, text="Start Scan", command=start_scan,
+                            bg='#008000', fg='white', font=font_main, 
+                            relief='raised', bd=2, width=12)
+        scan_btn.pack(side='left', padx=5)
+        
+        stop_btn = tk.Button(control_frame, text="Stop Scan", command=stop_scan,
+                            bg='#800000', fg='white', font=font_main, 
+                            relief='raised', bd=2, width=12, state='disabled')
+        stop_btn.pack(side='left', padx=5)
+        
+        recover_btn = tk.Button(control_frame, text="Extract Selected", command=recover_files,
+                               bg='#000080', fg='white', font=font_main, 
+                               relief='raised', bd=2, width=15, state='disabled')
+        recover_btn.pack(side='right', padx=5)
+        
+        # Initialize
+        refresh_drives()
+        
+        # Add to taskbar
+        self.add_window_to_taskbar("File Fisher", recovery_window)
+        recovery_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("File Fisher", recovery_window))
     
     def create_about_window(self):
         about_window = tk.Toplevel(self.rootW95dist)
@@ -5094,17 +6595,447 @@ class Windows95Desktop:
         self.clock_label = tk.Label(self.clock_frame, bg="#c0c0c0", font=("MS Sans Serif", 8))
         self.clock_label.pack(padx=5, pady=1)
     
+    def create_calendar(self):
+        """Creează un calendar retro în stil Windows 95"""
+        calendar_window = tk.Toplevel(self.rootW95dist)
+        calendar_window.title("Calendar")
+        calendar_window.overrideredirect(True)
+        calendar_window.geometry("640x480+300+200")
+        calendar_window.configure(bg="#c0c0c0")
+        
+        # Add Windows 95 style title bar
+        title_bar = tk.Frame(calendar_window, bg="#000080", height=25)
+        title_bar.pack(fill="x", side="top")
+        title_label = tk.Label(title_bar, text="Calendar", fg="white", bg="#000080",
+                             font=("MS Sans Serif", 8, "bold"))
+        title_label.pack(side="left", padx=5, pady=2)
+        
+        # Close button for title bar
+        close_button = tk.Button(title_bar, text="×", bg="#c0c0c0", fg="black",
+                               font=("Arial", 8, "bold"), width=2, height=1,
+                               relief="raised", bd=1,
+                               command=lambda: self.close_window("Calendar", calendar_window))
+        close_button.pack(side="right", padx=2, pady=1)
+        
+        self.make_window_draggable(calendar_window, title_bar)
+        
+        # Set Windows 95 style colors
+        win95_bg = "#c0c0c0"
+        win95_button = "#c0c0c0"
+        win95_shadow = "#808080"
+        win95_highlight = "#ffffff"
+        win95_text = "#000000"
+        calendar_bg = "#e0e0e0"  # Lighter color for the calendar table
+        
+        # Date variables
+        current_date = datetime.now()
+        year = current_date.year
+        month = current_date.month
+        
+        # List of month names
+        month_names = [
+            "", "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ]
+        
+        # List of day names
+        day_names = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+        
+        # Events dictionary
+        events = {}
+        
+        # Load saved events
+        def load_events():
+            """Load events from a JSON file"""
+            try:
+                if os.path.exists("calendar_events.json"):
+                    with open("calendar_events.json", "r") as file:
+                        return json.load(file)
+                return {}
+            except Exception as e:
+                messagebox.showerror("Error", f"Failed to load events: {str(e)}")
+                return {}
+        
+        events = load_events()
+        
+        # Main frame
+        main_frame = tk.Frame(calendar_window, bg=win95_bg, bd=2, relief="raised")
+        main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        
+        # Calendar control frame
+        control_frame = tk.Frame(main_frame, bg=win95_bg, bd=2, relief="raised")
+        control_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # Functions for navigation
+        def prev_month():
+            nonlocal month, year
+            if month > 1:
+                month -= 1
+            else:
+                month = 12
+                year -= 1
+            update_calendar()
+        
+        def next_month():
+            nonlocal month, year
+            if month < 12:
+                month += 1
+            else:
+                month = 1
+                year += 1
+            update_calendar()
+        
+        # Navigation buttons
+        prev_button = tk.Button(
+            control_frame,
+            text="< Previous",
+            command=prev_month,
+            bg=win95_button,
+            fg=win95_text,
+            relief="raised",
+            bd=2,
+            font=("MS Sans Serif", 8)
+        )
+        prev_button.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        next_button = tk.Button(
+            control_frame,
+            text="Next >",
+            command=next_month,
+            bg=win95_button,
+            fg=win95_text,
+            relief="raised",
+            bd=2,
+            font=("MS Sans Serif", 8)
+        )
+        next_button.pack(side=tk.LEFT, padx=5, pady=5)
+        
+        # Label for current month and year
+        month_year_label = tk.Label(
+            control_frame,
+            text="",
+            font=("MS Sans Serif", 10, "bold"),
+            bg=win95_bg
+        )
+        month_year_label.pack(side=tk.LEFT, padx=30, pady=5)
+        
+        # Frame for displaying the calendar grid
+        calendar_frame = tk.Frame(main_frame, bg=win95_bg, bd=2, relief="raised")
+        calendar_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # Week day names
+        for i, day in enumerate(day_names):
+            day_label = tk.Label(
+                calendar_frame,
+                text=day,
+                font=("MS Sans Serif", 8, "bold"),
+                width=9,
+                height=1,
+                bg="#d3d3d3",
+                bd=1,
+                relief="sunken"
+            )
+            day_label.grid(row=0, column=i, sticky="nsew", padx=1, pady=1)
+        
+        # Create grid of cells for days
+        day_cells = []
+        for row in range(6):
+            row_cells = []
+            for col in range(7):
+                cell = tk.Button(
+                    calendar_frame,
+                    text="",
+                    font=("MS Sans Serif", 8),
+                    bg=calendar_bg,
+                    relief="raised",
+                    bd=1,
+                    width=9,
+                    height=4,
+                    justify="left",
+                    anchor="nw"
+                )
+                cell.grid(row=row+1, column=col, sticky="nsew", padx=1, pady=1)
+                row_cells.append(cell)
+            day_cells.append(row_cells)
+        
+        # Configure grid for resolution
+        for i in range(7):
+            calendar_frame.columnconfigure(i, weight=1)
+        for i in range(7):
+            calendar_frame.rowconfigure(i, weight=1)
+        
+        # Status bar frame
+        status_frame = tk.Frame(main_frame, bg=win95_bg, bd=1, relief="sunken")
+        status_frame.pack(fill=tk.X, side=tk.BOTTOM)
+        
+        status_label = tk.Label(
+            status_frame,
+            text="Ready",
+            bg=win95_bg,
+            font=("MS Sans Serif", 8),
+            anchor="w"
+        )
+        status_label.pack(side=tk.LEFT, padx=5)
+        
+        def get_month_calendar(year, month):
+            """Generate calendar for specified month and year"""
+            # First day of the month
+            first_day = datetime(year, month, 1)
+            
+            # Weekday for the first day (0 = Monday, 6 = Sunday in ISO format)
+            first_weekday = first_day.weekday()
+            
+            # Number of days in current month
+            if month == 12:
+                last_day = datetime(year + 1, 1, 1) - timedelta(days=1)
+            else:
+                last_day = datetime(year, month + 1, 1) - timedelta(days=1)
+            days_in_month = last_day.day
+            
+            # Build calendar as a matrix
+            cal = []
+            week = [0] * 7  # Initialize with 7 zeros
+            
+            # Fill previous days with zeros
+            for i in range(first_weekday):
+                week[i] = 0
+                
+            day = 1
+            for i in range(first_weekday, 7):
+                if day <= days_in_month:
+                    week[i] = day
+                    day += 1
+                else:
+                    week[i] = 0
+                    
+            cal.append(week)
+            
+            # Continue with the rest of the weeks
+            while day <= days_in_month:
+                week = [0] * 7
+                for i in range(7):
+                    if day <= days_in_month:
+                        week[i] = day
+                        day += 1
+                    else:
+                        week[i] = 0
+                cal.append(week)
+                
+            return cal
+        
+        def save_events():
+            """Save events to a JSON file"""
+            with open("calendar_events.json", "w") as file:
+                json.dump(events, file)
+        
+        def add_event(date_str, listbox, parent_window):
+            """Add an event for the specified date"""
+            event = simpledialog.askstring(
+                "Add event",
+                "Enter event description:",
+                parent=parent_window
+            )
+            
+            if event:
+                if date_str not in events:
+                    events[date_str] = []
+                
+                events[date_str].append(event)
+                listbox.insert(tk.END, event)
+                update_calendar()
+                save_events()  # Save events after adding
+        
+        def delete_event(date_str, listbox):
+            """Delete the selected event"""
+            selected = listbox.curselection()
+            
+            if selected:
+                index = selected[0]
+                if date_str in events and index < len(events[date_str]):
+                    listbox.delete(index)
+                    del events[date_str][index]
+                    update_calendar()
+                    save_events()  # Save events after deleting
+            else:
+                messagebox.showinfo(
+                    "Warning",
+                    "Select an event to delete."
+                )
+        
+        def day_click(day, month, year):
+            """Handler for clicking on a day in the calendar"""
+            date_obj = datetime(year, month, day)
+            date_str = date_obj.strftime("%Y-%m-%d")
+            date_display = f"{day} {month_names[month]} {year}"
+            
+            # Create window for viewing/adding events
+            events_window = tk.Toplevel(calendar_window)
+            events_window.title(f"Events - {date_display}")
+            events_window.overrideredirect(True)
+            events_window.geometry("400x300")
+            events_window.configure(bg=win95_bg)
+            
+            # Title bar
+            title_bar = tk.Frame(events_window, bg="#000080", height=22)
+            title_bar.pack(fill=tk.X)
+            
+            title_text = tk.Label(
+                title_bar, 
+                text=f"Events - {date_display}",
+                fg="white", 
+                bg="#000080",
+                font=("MS Sans Serif", 8, "bold")
+            )
+            title_text.pack(side=tk.LEFT, padx=5)
+            
+            # Close button
+            close_button = tk.Button(
+                title_bar, 
+                text="×", 
+                bg="#c0c0c0",
+                fg="black",
+                font=("Arial", 8, "bold"),
+                width=2,
+                height=1,
+                relief="raised",
+                bd=1,
+                command=events_window.destroy
+            )
+            close_button.pack(side=tk.RIGHT, padx=2, pady=1)
+            
+            # Make window draggable
+            self.make_window_draggable(events_window, title_bar)
+            
+            # Main frame
+            main_frame = tk.Frame(events_window, bg=win95_bg, bd=2, relief="raised")
+            main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+            
+            # Listbox with events
+            events_label = tk.Label(
+                main_frame, 
+                text="Events:", 
+                bg=win95_bg,
+                font=("MS Sans Serif", 8, "bold"),
+                anchor="w"
+            )
+            events_label.pack(fill=tk.X, padx=5, pady=5)
+            
+            events_frame = tk.Frame(main_frame, bg="white", bd=1, relief="sunken")
+            events_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+            
+            events_listbox = tk.Listbox(
+                events_frame,
+                font=("MS Sans Serif", 8),
+                bg="white",
+                selectmode=tk.SINGLE
+            )
+            events_listbox.pack(fill=tk.BOTH, expand=True)
+            
+            # Action buttons
+            buttons_frame = tk.Frame(main_frame, bg=win95_bg)
+            buttons_frame.pack(fill=tk.X, pady=5)
+            
+            add_button = tk.Button(
+                buttons_frame, 
+                text="Add event", 
+                command=lambda: add_event(date_str, events_listbox, events_window),
+                bg=win95_button,
+                fg=win95_text,
+                relief="raised",
+                bd=2,
+                font=("MS Sans Serif", 8)
+            )
+            add_button.pack(side=tk.LEFT, padx=5)
+            
+            delete_button = tk.Button(
+                buttons_frame, 
+                text="Delete event", 
+                command=lambda: delete_event(date_str, events_listbox),
+                bg=win95_button,
+                fg=win95_text,
+                relief="raised",
+                bd=2,
+                font=("MS Sans Serif", 8)
+            )
+            delete_button.pack(side=tk.LEFT, padx=5)
+            
+            close_button = tk.Button(
+                buttons_frame, 
+                text="Close", 
+                command=events_window.destroy,
+                bg=win95_button,
+                fg=win95_text,
+                relief="raised",
+                bd=2,
+                font=("MS Sans Serif", 8)
+            )
+            close_button.pack(side=tk.RIGHT, padx=5)
+            
+            # Populate listbox with existing events
+            if date_str in events:
+                for event in events[date_str]:
+                    events_listbox.insert(tk.END, event)
+        
+        def update_calendar():
+            # Update month and year label
+            month_name = month_names[month]
+            month_year_label.config(text=f"{month_name} {year}")
+            
+            # Get calendar for current month
+            cal = get_month_calendar(year, month)
+            
+            # Reset all cells
+            for row in day_cells:
+                for cell in row:
+                    cell.config(
+                        text="",
+                        bg=calendar_bg,
+                        command=lambda: None
+                    )
+            
+            # Fill cells with dates
+            for week_idx, week in enumerate(cal):
+                for day_idx, day in enumerate(week):
+                    if day != 0:
+                        # Determine if day has events
+                        date_obj = datetime(year, month, day)
+                        date_str = date_obj.strftime("%Y-%m-%d")
+                        has_events = date_str in events and len(events[date_str]) > 0
+                        
+                        # Text for cell
+                        cell_text = f"{day}"
+                        if has_events:
+                            cell_text += f"\n[{len(events[date_str])} events]"
+                        
+                        # Configure cell
+                        day_cells[week_idx][day_idx].config(
+                            text=cell_text,
+                            bg="#d3d3d3" if has_events else calendar_bg,
+                            command=lambda d=day, m=month, y=year: 
+                                   day_click(d, m, y)
+                        )
+        
+        # Initial calendar update
+        update_calendar()
+        
+        # Add to taskbar
+        self.add_window_to_taskbar("Calendar", calendar_window)
+        calendar_window.protocol("WM_DELETE_WINDOW", lambda: self.close_window("Calendar", calendar_window))
+    
     def setup_clock(self):
-        # def update_clock():
-            # current_time = time.strftime("%H:%M")
-            # current_date = time.strftime("%d/%m/%Y")
-            # self.clock_label.config(text=f"{current_time}\n{current_date}")
-            # self.rootW95dist.after(1000, update_clock)  # Update every second
         def update_clock():
             current = datetime.now()
             formatted_text = current.strftime("%H:%M %d.%m.%y")  # ex: "15:30 29.07.25"
             self.clock_label.config(text=formatted_text)
             self.rootW95dist.after(1000, update_clock)
+        
+        # Adaugă event handler pentru click pe ceas
+        self.clock_frame.bind("<Button-1>", lambda e: self.create_calendar())
+        self.clock_label.bind("<Button-1>", lambda e: self.create_calendar())
+        
+        # Schimbă cursorul pentru a indica că se poate face click
+        self.clock_frame.config(cursor="hand2")
+        self.clock_label.config(cursor="hand2")
         
         update_clock()
     
