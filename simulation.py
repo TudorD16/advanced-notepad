@@ -712,4 +712,96 @@ if __name__ == "__main__":
     # Check database before running installer
     if check_database():
         installer = Windows95Installer()
+##############################
+        def create_logo(self, parent_frame):
+    """Create a 3D retro PC logo similar to Windows 95 style"""
+    logo_canvas = tk.Canvas(parent_frame, width=120, height=100, bg='#c0c0c0', 
+                           highlightthickness=0)
+    logo_canvas.pack(side='right', anchor='ne', padx=(0, 20), pady=10)
+    
+    # Draw PC case (tower) - 3D effect
+    # Main front face
+    logo_canvas.create_rectangle(20, 25, 50, 75, fill='#e0e0e0', outline='#808080', width=1)
+    # Top face (3D)
+    logo_canvas.create_polygon(20, 25, 25, 20, 55, 20, 50, 25, fill='#f0f0f0', outline='#808080')
+    # Right face (3D)
+    logo_canvas.create_polygon(50, 25, 55, 20, 55, 70, 50, 75, fill='#d0d0d0', outline='#808080')
+    
+    # Draw floppy drive slot
+    logo_canvas.create_rectangle(25, 30, 45, 35, fill='#404040', outline='#202020')
+    
+    # Draw CD-ROM drive
+    logo_canvas.create_rectangle(25, 40, 45, 45, fill='#606060', outline='#404040')
+    logo_canvas.create_rectangle(42, 41, 44, 44, fill='#808080', outline='#606060')
+    
+    # Draw power button
+    logo_canvas.create_oval(40, 50, 45, 55, fill='#ff4040', outline='#cc0000')
+    
+    # Draw some ventilation lines
+    for i in range(3):
+        y = 60 + i * 3
+        logo_canvas.create_line(25, y, 45, y, fill='#a0a0a0', width=1)
+    
+    # Draw monitor
+    # Monitor base/stand
+    logo_canvas.create_rectangle(65, 70, 85, 75, fill='#c0c0c0', outline='#808080')
+    # Monitor screen (3D)
+    logo_canvas.create_rectangle(60, 30, 90, 60, fill='#f0f0f0', outline='#808080', width=1)
+    # Top face
+    logo_canvas.create_polygon(60, 30, 65, 25, 95, 25, 90, 30, fill='#ffffff', outline='#808080')
+    # Right face
+    logo_canvas.create_polygon(90, 30, 95, 25, 95, 55, 90, 60, fill='#e0e0e0', outline='#808080')
+    
+    # Draw screen content (blue desktop)
+    logo_canvas.create_rectangle(65, 35, 85, 55, fill='#008080', outline='#008080')
+    
+    # Draw small window on screen
+    logo_canvas.create_rectangle(68, 38, 80, 48, fill='#c0c0c0', outline='#808080')
+    logo_canvas.create_rectangle(68, 38, 80, 42, fill='#000080', outline='#000080')
+    
+    # Draw keyboard (simple 3D)
+    logo_canvas.create_rectangle(55, 78, 95, 88, fill='#f0f0f0', outline='#808080')
+    logo_canvas.create_polygon(55, 78, 60, 73, 100, 73, 95, 78, fill='#ffffff', outline='#808080')
+    logo_canvas.create_polygon(95, 78, 100, 73, 100, 83, 95, 88, fill='#e0e0e0', outline='#808080')
+    
+    # Draw some keys
+    for x in range(4):
+        for y in range(2):
+            kx = 58 + x * 8
+            ky = 80 + y * 3
+            logo_canvas.create_rectangle(kx, ky, kx+5, ky+2, fill='#e8e8e8', outline='#c0c0c0')
         installer.run()
+
+
+În show_welcome_screen() - după content_frame.pack(...):
+
+pythonself.create_logo(content_frame)
+
+În show_user_info() - după content_frame.pack(...):
+
+pythonself.create_logo(content_frame)
+
+În show_computer_name() - după content_frame.pack(...):
+
+pythonself.create_logo(content_frame)
+
+În show_components() - după content_frame.pack(...):
+
+pythonself.create_logo(content_frame)
+
+În show_startup_disk() - după content_frame.pack(...):
+
+pythonself.create_logo(content_frame)
+
+În start_copying_files() - după content_frame.pack(...):
+
+pythonself.create_logo(content_frame)
+
+În show_restart_screen() - după content_frame.pack(...):
+
+pythonself.create_logo(content_frame)
+
+În show_welcome_to_windows() - după content_frame.pack(...):
+
+pythonself.create_logo(content_frame)
+3. Adaugă funcția create_logo în clasa Windows95Installer (după center_window()).
