@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiapp 95 Professional - IT Management Tool Suite</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: #1a1a1a;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #333;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 150px 0 100px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #fff;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: #aaa;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .cta-button:hover {
+            background: #444;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 3rem;
+            color: #fff;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 1.5rem;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: #fff;
+        }
+
+        .feature-card p {
+            color: #aaa;
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 60px 0;
+            background: #1a1a1a;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            padding: 1rem;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 1rem;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            padding: 80px 0;
+        }
+
+        .tech-items {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .tech-item {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 0.8rem 1.5rem;
+        }
+
+        /* Requirements */
+        .requirements {
+            padding: 80px 0;
+            background: #1a1a1a;
+        }
+
+        .req-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .req-card {
+            background: #121212;
+            border: 1px solid #333;
+            padding: 1.5rem;
+        }
+
+        .req-card h4 {
+            color: #fff;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .req-list {
+            list-style: none;
+        }
+
+        .req-list li {
+            margin-bottom: 0.5rem;
+            color: #aaa;
+            position: relative;
+            padding-left: 1.2rem;
+        }
+
+        .req-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #fff;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            padding: 40px 0 20px;
+            border-top: 1px solid #333;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: #aaa;
+            text-decoration: none;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .footer-section a:hover {
+            color: #fff;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid #333;
+            color: #777;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">Multiapp 95 Professional</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#tech">Technology</a></li>
+                <li><a href="#requirements">Requirements</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h1>Multiapp 95 Professional</h1>
+            <p>The ultimate IT management suite with 50+ professional tools in a single executable</p>
+            <a href="#features" class="cta-button">Discover Features</a>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats">
+        <div class="container">
+            <h2 class="section-title">Exceptional Performance</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Professional Tools</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">20%</div>
+                    <div class="stat-label">Faster File Operations</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">500MB</div>
+                    <div class="stat-label">Single File Size</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Required Installations</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Key Features</h2>
+            <div class="features-grid">
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">🔧</div>
+                    <h3>System & Diagnostic Tools</h3>
+                    <p>Real-time hardware monitoring, network diagnostics, IT process automation, advanced terminal, and much more.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">📁</div>
+                    <h3>Pro File Management</h3>
+                    <p>Intelligent backup, advanced file comparison, automatic organization, file recovery, and ZIP archiving.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Security Suite</h3>
+                    <p>Military-grade encryption, advanced password manager, multi-level authentication, and password generators.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">💼</div>
+                    <h3>Office Suite Lite</h3>
+                    <p>Office document reader, spreadsheet editor, PDF tools, document conversions, and more.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">💻</div>
+                    <h3>Development Tools</h3>
+                    <p>Complete Python IDE, advanced text editor, Markdown viewer, SQLite editor, and script agent.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI & Productivity</h3>
+                    <p>AI chatbot, smart calendar, task manager, knowledge base, and workflow automation.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Network Tools</h3>
+                    <p>Network monitoring, port scanner, connection diagnostics, and real-time traffic analysis.</p>
+                </div>
+                <div class="feature-card animate-on-scroll">
+                    <div class="feature-icon">🚀</div>
+                    <h3>Portable Application</h3>
+                    <p>Single executable, no installation, runs from anywhere, automatic compatibility, and optimized performance.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section id="tech" class="tech-stack">
+        <div class="container">
+            <h2 class="section-title">Technology Stack</h2>
+            <div class="tech-items">
+                <div class="tech-item animate-on-scroll">Python</div>
+                <div class="tech-item animate-on-scroll">C++</div>
+                <div class="tech-item animate-on-scroll">Windows x64</div>
+                <div class="tech-item animate-on-scroll">Single executable</div>
+                <div class="tech-item animate-on-scroll">Optimized architecture</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Requirements -->
+    <section id="requirements" class="requirements">
+        <div class="container">
+            <h2 class="section-title">System Requirements</h2>
+            <div class="req-grid">
+                <div class="req-card animate-on-scroll">
+                    <h4>Minimum Requirements</h4>
+                    <ul class="req-list">
+                        <li>x64 (64-bit) Processor 1-2 GHz</li>
+                        <li>Windows 10 (build 1903+) or Windows 11</li>
+                        <li>4GB RAM</li>
+                        <li>500MB disk space</li>
+                        <li>Administrator privileges</li>
+                        <li>Internet connection for AI features</li>
+                    </ul>
+                </div>
+                <div class="req-card animate-on-scroll">
+                    <h4>Recommended Specifications</h4>
+                    <ul class="req-list">
+                        <li>Intel Core i5 or AMD Ryzen 5</li>
+                        <li>8GB-16GB RAM</li>
+                        <li>SSD for fast operations</li>
+                        <li>1920x1080+ resolution</li>
+                        <li>100% zoom for optimal display</li>
+                    </ul>
+                </div>
+                <div class="req-card animate-on-scroll">
+                    <h4>Advantages</h4>
+                    <ul class="req-list">
+                        <li>No installation required</li>
+                        <li>Fully portable application</li>
+                        <li>Automatic compatibility check</li>
+                        <li>All features unlocked</li>
+                        <li>No external dependencies</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Multiapp 95 Professional</h4>
+                    <p>The ultimate IT management suite with 50+ professional tools in a single executable.</p>
+                    <p>Version 0.95.0</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact</h4>
+                    <p>Developer: Tudor Marmureanu</p>
+                    <p>Company: Muap - Retro Computing Division</p>
+                    <a href="mailto:support@muap.ro">support@muap.ro</a>
+                </div>
+                <div class="footer-section">
+                    <h4>Information</h4>
+                    <p>Architecture: x64 (64-bit)</p>
+                    <p>Size: ~500MB</p>
+                    <p>Distribution: Single executable file</p>
+                    <p>License: Professional IT Environments</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Muap - Retro Computing Division. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+    </script>
+</body>
+</html>
+
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiapp 95 Professional - Complete IT Management Tool Suite | 50+ Tools in One</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #121212;
+            color: #e0e0e0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: #1a1a1a;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid #333;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: #e0e0e0;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #fff;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 150px 0 100px;
+            text-align: center;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            color: #aaa;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 15px 35px;
+            background: #333;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            background: #444;
+            transform: translateY(-2px);
+        }
+
+        /* Sections */
+        .features, .use-cases, .installation, .maintenance {
+            padding: 80px 0;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 2rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: #555;
+            transform: translateY(-5px);
+        }
+
+        .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: #aaa;
+            line-height: 1.7;
+        }
+
+        .feature-card ul {
+            list-style: none;
+            color: #aaa;
+            line-height: 1.7;
+        }
+
+        .feature-card ul li {
+            margin-bottom: 0.5rem;
+            position: relative;
+            padding-left: 1.2rem;
+        }
+
+        .feature-card ul li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 80px 0;
+            background: #1a1a1a;
+            text-align: center;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .stat-item {
+            padding: 1.5rem;
+            background: #121212;
+            border-radius: 8px;
+            border: 1px solid #333;
+        }
+
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #aaa;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            padding: 80px 0;
+            background: #0f0f0f;
+        }
+
+        .tech-items {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .tech-item {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 1rem 2rem;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: #2a2a2a;
+            border-color: #555;
+        }
+
+        /* Requirements */
+        .requirements {
+            padding: 80px 0;
+            background: #1a1a1a;
+        }
+
+        .warning-box {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: #2a1a1a;
+            border: 2px solid #ff4444;
+            border-radius: 8px;
+        }
+
+        .warning-box h3 {
+            color: #ff4444;
+            margin-bottom: 0.5rem;
+            font-size: 1.3rem;
+        }
+
+        .warning-box p {
+            color: #ffdddd;
+            font-weight: bold;
+        }
+
+        .req-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .req-card {
+            background: #121212;
+            border: 1px solid #333;
+            padding: 2rem;
+            border-radius: 8px;
+        }
+
+        .req-card h4 {
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .req-list {
+            list-style: none;
+        }
+
+        .req-list li {
+            margin-bottom: 0.7rem;
+            color: #aaa;
+            position: relative;
+            padding-left: 1.5rem;
+            line-height: 1.6;
+        }
+
+        .req-list li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        /* Installation Section */
+        .installation {
+            background: #0f0f0f;
+        }
+
+        .what-you-get {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .what-you-get-box {
+            display: inline-block;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 600px;
+        }
+
+        .what-you-get h3 {
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+        }
+
+        .what-you-get-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            text-align: left;
+        }
+
+        .checkmark {
+            color: #4ade80;
+            font-weight: bold;
+        }
+
+        /* Footer */
+        footer {
+            background: #1a1a1a;
+            padding: 60px 0 30px;
+            border-top: 1px solid #333;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 3rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            color: #fff;
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .footer-section p,
+        .footer-section a {
+            color: #aaa;
+            text-decoration: none;
+            margin-bottom: 0.8rem;
+            display: block;
+            line-height: 1.6;
+        }
+
+        .footer-section a:hover {
+            color: #fff;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+            color: #777;
+        }
+
+        .footer-bottom p {
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight {
+            color: #4ade80;
+            font-weight: 600;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .req-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .what-you-get-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding: 120px 0 80px;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .tech-items {
+                gap: 1rem;
+            }
+
+            .tech-item {
+                padding: 0.8rem 1.5rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="container">
+            <div class="logo">Multiapp 95 Professional</div>
+            <ul class="nav-links">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#tech">Technology</a></li>
+                <li><a href="#requirements">Requirements</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="container">
+            <h1>Multiapp 95 Professional</h1>
+            <p>The ultimate productivity and efficiency suite designed specifically for IT support departments. Revolutionary software combining over 50+ professional tools into a single, powerful executable file, streamlining various IT tasks from system monitoring to file management, network diagnostics, development tools, and advanced AI-powered productivity features.</p>
+            <a href="#features" class="cta-button">Discover Features</a>
+        </div>
+    </section>
+
+    <!-- Stats -->
+    <section class="stats">
+        <div class="container">
+            <h2 class="section-title">Performance Benefits & Advantages</h2>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number">50+</div>
+                    <div class="stat-label">Professional Tools</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">20%</div>
+                    <div class="stat-label">Faster File Operations</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">500MB</div>
+                    <div class="stat-label">Single File Size</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">0</div>
+                    <div class="stat-label">Required Installations</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Romanian AI Support</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">x64</div>
+                    <div class="stat-label">Architecture Only</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Professional Use Cases -->
+    <section class="use-cases">
+        <div class="container">
+            <h2 class="section-title">Professional Use Cases</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>IT Support Departments</h3>
+                    <p>Comprehensive diagnostic and task automation tools for efficient support operations and system maintenance. Perfect for help desk teams and technical support professionals.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>System Administrators</h3>
+                    <p>Advanced monitoring and management capabilities for server infrastructure and network administration. Complete tools for system oversight and maintenance.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Developers</h3>
+                    <p>Complete Python IDE, database management tools, and development environment with debugging support. Everything needed for professional software development.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Office Professionals</h3>
+                    <p>Office Lite suite with document reading, spreadsheet editing, and comprehensive productivity tools for daily business operations.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Network Engineers</h3>
+                    <p>Advanced network analysis, monitoring, port scanning, and traffic analysis for network optimization and troubleshooting.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Security Teams</h3>
+                    <p>Military-grade encryption, password management, and comprehensive security tools for data protection and system security.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="features">
+        <div class="container">
+            <h2 class="section-title">Comprehensive Feature Set</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>System & Diagnostic Tools</h3>
+                    <p>Complete system management suite including system compatibility testing, hardware diagnostics & monitoring, network troubleshooting, IT process automation, advanced terminal emulator, performance optimization, alert monitor, event viewer, manual & automatic repair tool, real-time system information, task manager, process viewer, and Multiapp dashboard for essential information.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>File Management Pro Tools</h3>
+                    <p>Professional file management capabilities with smart backup tool, advanced files & folders comparator, ZIP password recovery & maker, intelligent file organizer, Explorer mode, Copy App with network file copying, rename utility, file archeologist, archive management, file history tools, File Fisher searching, and Recovery Tunnel for advanced file recovery.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Security Suite</h3>
+                    <p>Enterprise-grade security tools featuring military-grade file encryption, advanced password manager & generation tools, multi-level authentication system, terminal access restrictions, multiple password generators (Basic & Advanced V2), password storage and management, file encryption and security tools, ZIP password recovery, and safety tool for vulnerability avoidance.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Office Suite Lite</h3>
+                    <p>Comprehensive office productivity suite with Office document reader for Word, PowerPoint & Excel, spreadsheet editor with formula support (SUM, AVERAGE, MIN, MAX, COUNT, PRODUCT, MEDIAN, CONCAT), PDF tools suite with encryption, image extraction, page manipulation, PDF to Word conversion, paint app & whiteboard, find & replace text tool, and contacts manager.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Development Tools</h3>
+                    <p>Complete development environment featuring full-featured Python IDE with debugging support, advanced text editor with syntax highlighting, Markdown viewer, SQLite editor & reader with query tools, script agent for automation, multi file editor for configurations, project management capabilities, and syntax highlighting for multiple programming languages.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>AI & Productivity</h3>
+                    <p>Advanced AI-powered productivity suite with AI chatbot (95% Romanian language support), smart calendar & scheduling, task manager system, knowledge base system (Standard & Retro), account launcher & manager, workflow automation, Q&A platform, pause manager for teams, screen recorder app, visual diagram creator, expense tracker with reporting, quiz creation and testing, XML editor, and text search utility.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Network & Connectivity Tools</h3>
+                    <p>Professional networking suite including network information display, network monitoring, port scanner with service identification, ping tool with latency analysis, network console with Wi-Fi password recovery, bandwidth monitoring with real-time graphs, device status listener, network traffic monitoring, connection quality testing, performance optimization, topology discovery, and security scanning.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Portable Application</h3>
+                    <p>Revolutionary deployment model with single executable requiring no installation, runs from anywhere (USB, network), automatic compatibility check, all features unlocked immediately, no external dependencies, optimized architecture with precompiled paths, direct bit allocation, and 18.8% - 20% faster copying performance compared to traditional methods.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack -->
+    <section id="tech" class="tech-stack">
+        <div class="container">
+            <h2 class="section-title">Technology Stack & Architecture</h2>
+            <div class="tech-items">
+                <div class="tech-item">Python</div>
+                <div class="tech-item">C++</div>
+                <div class="tech-item">Windows x64 Only</div>
+                <div class="tech-item">Single executable</div>
+                <div class="tech-item">Precompiled paths</div>
+                <div class="tech-item">Direct bit allocation</div>
+                <div class="tech-item">Optimized architecture</div>
+                <div class="tech-item">No installer needed</div>
+                <div class="tech-item">Portable deployment</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Requirements -->
+    <section id="requirements" class="requirements">
+        <div class="container">
+            <h2 class="section-title">System Requirements</h2>
+            <div class="warning-box">
+                <h3>Important Notice</h3>
+                <p>This software is designed exclusively for x64 (64-bit) systems</p>
+            </div>
+            <div class="req-grid">
+                <div class="req-card">
+                    <h4>Minimum Requirements</h4>
+                    <ul class="req-list">
+                        <li>x64 (64-bit) Processor 1-2 GHz (Required)</li>
+                        <li>Windows 10 (build 1903+) or Windows 11</li>
+                        <li>Intel i3 or AMD equivalent</li>
+                        <li>4GB RAM minimum</li>
+                        <li>500MB free disk space</li>
+                        <li>Administrator privileges for full functionality</li>
+                        <li>Internet connection for AI features and updates</li>
+                        <li>100% zoom recommended (especially for laptops)</li>
+                    </ul>
+                </div>
+                <div class="req-card">
+                    <h4>Recommended Specifications</h4>
+                    <ul class="req-list">
+                        <li>Intel Core i5 or AMD Ryzen 5 (or equivalent)</li>
+                        <li>8GB-16GB RAM (16GB for heavy development)</li>
+                        <li>SSD for faster file operations</li>
+                        <li>1920x1080+ resolution</li>
+                        <li>Proper network permissions for file copying</li>
+                        <li>Updated graphics drivers</li>
+                    </ul>
+                </div>
+                <div class="req-card">
+                    <h4>Built-in Features</h4>
+                    <ul class="req-list">
+                        <li>Automatic compatibility checker</li>
+                        <li>No installation required</li>
+                        <li>Fully portable application</li>
+                        <li>All features unlocked immediately</li>
+                        <li>No external dependencies</li>
+                        <li>Self-healing repair capabilities</li>
+                        <li>Display optimization for laptops</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation & Setup Guide -->
+    <section class="installation">
+        <div class="container">
+            <h2 class="section-title">Installation & Setup Guide</h2>
+            
+            <div class="what-you-get">
+                <div class="what-you-get-box">
+                    <h3>What You Get</h3>
+                    <div class="what-you-get-grid">
+                        <div><span class="checkmark">✓</span> Single executable file - no installer needed</div>
+                        <div><span class="checkmark">✓</span> Portable application - run from anywhere</div>
+                        <div><span class="checkmark">✓</span> All features unlocked immediately</div>
+                        <div><span class="checkmark">✓</span> No additional dependencies required</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>1. Download</h3>
+                    <ul>
+                        <li>Download the Multiapp.exe file</li>
+                        <li>File size: ~500MB</li>
+                        <li>Single executable file</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>2. System Check</h3>
+                    <ul>
+                        <li>Ensure x64 (64-bit) processor</li>
+                        <li>Built-in compatibility checker</li>
+                        <li>Verify minimum requirements</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>3. Display Configuration</h3>
+                    <ul>
+                        <li>Set zoom to 100% for best experience</li>
+                        <li>Adjust high DPI settings for laptops</li>
+                        <li>Configure scaling as needed</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>4. First Run</h3>
+                    <ul>
+                        <li>Run as Administrator (recommended)</li>
+                        <li>Built-in authentication system</li>
+                        <li>Explore features immediately</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>5. Configuration Files</h3>
+                    <ul>
+                        <li>Accounts.txt - User account information</li>
+                        <li>paths.txt - Network paths for Copy App</li>
+                        <li>profiles.json - Equipment profiles</li>
+                        <li>Config folder - XML configurations</li>
+                    </ul>
+                </div>
+                <div class="feature-card">
+                    <h3>6. Quick Start Tips</h3>
+                    <ul>
+                        <li>Use built-in help system</li>
+                        <li>AI chatbot can assist with questions</li>
+                        <li>Administrator privileges recommended</li>
+                        <li>Internet connection for AI features</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Repair & Maintenance -->
+    <section class="maintenance">
+        <div class="container">
+            <h2 class="section-title">Repair & Maintenance</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <h3>Automatic Repair (Fetcher)</h3>
+                    <p>Use the Fetcher - Repair Setup feature for automatic error correction and file restoration with comprehensive diagnostics. This tool can automatically detect and fix common issues.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Manual Repair (Shell Integrator)</h3>
+                    <p>Complete manual repair process with step-by-step commands for advanced troubleshooting and system restoration. Includes detailed command sequence for expert users.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Display Issues</h3>
+                    <p>Adjust DPI settings for high-resolution displays, set zoom to 100%, and update graphics drivers for optimal performance. Configure high DPI settings for laptops.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Performance Issues</h3>
+                    <p>Run as Administrator, close unnecessary applications, and ensure minimum system requirements are met. Monitor system resources for optimal performance.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>Network Connectivity</h3>
+                    <p>Check internet connection for AI features, verify firewall settings, and ensure proper network permissions for file operations and network tools.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>File Access Issues</h3>
+                    <p>Verify administrator privileges, check file permissions and ownership, ensure adequate disk space for operations and proper security settings.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="contact">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h4>Multiapp 95 Professional</h4>
+                    <p>The ultimate productivity and efficiency suite designed specifically for IT support departments. Revolutionary software combining over 50+ professional tools into a single, powerful executable file.</p>
+                    <p><strong>Version 0.95.0</strong></p>
+                    <p class="highlight">Mission: Revolutionize IT workflow management by providing an all-in-one solution that enhances productivity and streamlines operations.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Contact & Support</h4>
+                    <p><strong>Developer:</strong> Tudor Marmureanu</p>
+                    <p><strong>Company:</strong> Muap - Retro Computing Division</p>
+                    <a href="mailto:support@muap.ro">support@muap.ro</a>
+                    <br><br>
+                    <h4>Built-in Help Resources</h4>
+                    <p>Knowledge Base: Local documentation platform</p>
+                    <p>AI Chatbot: Integrated virtual assistant</p>
+                    <p>Read Me First: Essential usage information</p>
+                    <p>Multiapp Dashboard: Essential information</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Technical Information</h4>
+                    <p><strong>Architecture:</strong> x64 (64-bit) only</p>
+                    <p><strong>Size:</strong> ~500MB</p>
+                    <p><strong>Distribution:</strong> Single executable file</p>
+                    <p><strong>License:</strong> Professional IT Environments</p>
+                    <p><strong>Languages:</strong> Python and C++</p>
+                    <p><strong>Performance:</strong> 18.8% - 20% faster file operations</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Key Achievements</h4>
+                    <p>50+ integrated professional tools</p>
+                    <p>Zero installation requirements</p>
+                    <p>Military-grade security features</p>
+                    <p>95% Romanian language AI support</p>
+                    <p>Comprehensive network analysis</p>
+                    <p>Advanced development environment</p>
+                    <p>Real-time system monitoring</p>
+                    <p>Self-healing repair capabilities</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Muap - Retro Computing Division. All rights reserved.</p>
+                <p>Designed for professional IT environments with advanced network and system management capabilities. Some features may require administrative privileges or specific network permissions.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Simple smooth scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Simple fade-in animation for cards
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Initialize animation for feature cards
+        document.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.feature-card, .req-card, .stat-item');
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+</body>
+</html>
+-->
